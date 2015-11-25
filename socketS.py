@@ -5,7 +5,7 @@ from random import *
 
 server = "chat.freenode.net"
 port = 6667
-channels = ["##BWBellairs"]#, "##powder-bots", "BWBellairs"]
+channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
 botnick = "BWBellairs[Bot]"
 realname = "BWBellairs[Bot]"
 ident = "BWBellairs[Bot]"
