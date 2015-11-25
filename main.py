@@ -6,7 +6,7 @@ modules = ["socketS", "commandRun", "yo"]
 
 print ("yes")
 
-for i in module:
+for i in modules:
     try:
         exec("exec("+ i + ")")
     except:

