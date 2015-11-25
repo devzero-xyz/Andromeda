@@ -8,7 +8,7 @@ print ("yes")
 
 for i in modules:
     try:
-        exec("exec("+ i + ")")
+        exec(i)
     except:
         print ("Module doesn't exist")
 #=========================================================================================#
