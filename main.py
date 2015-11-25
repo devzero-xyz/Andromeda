@@ -2,15 +2,7 @@ from __future__ import print_function
 from time import sleep
 from socketS import *
 from commandRun import *
-modules = ["socketS", "commandRun", "yo"]
 
-print ("yes")
-
-for i in modules:
-    try:
-        exec(i)
-    except:
-        print ("Module doesn't exist")
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
@@ -20,6 +12,10 @@ connectAndIdentify()
 while True:
     recieve()
     
+    if returndata()[6] and returndata()[6].startswith("*") and command != None:
+        command(returndata()[6])
+        command == None
+
     if command == "*moo":
         irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 

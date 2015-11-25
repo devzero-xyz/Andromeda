@@ -6,7 +6,7 @@ from random import *
 server = "chat.freenode.net"
 port = 6667
 channels = ["##BWBellairs"]#, "##powder-bots", "BWBellairs"]
-botnick = "BWBellairs[Bot]2"
+botnick = "BWBellairs[Bot]"
 realname = "BWBellairs[Bot]"
 ident = "BWBellairs[Bot]"
 password = "[REDACTED]]"
@@ -21,6 +21,7 @@ chan = None
 message = None
 command = None
 irc = None
+args = None
 
 def connectAndIdentify():
 
@@ -39,7 +40,7 @@ def connectAndIdentify():
 
 def recieve():
 
-    global t, nickname, hotmask, msg_type, chan, message, command
+    global t, nickname, hotmask, msg_type, chan, message, command, args
     
     binary_data = irc.recv(1024)
     # Decode data from UTF-8
@@ -67,15 +68,20 @@ def recieve():
             chan = t[2]
             message = t[3:]
             
+            
             if message:
                 message[0] = message[0][0:]
                 command = message[0].lower()
                 command = str(command)
                 print (command)
 
+            if command:
+                args = command.split()[1:]
+
     except:
         pass
-
+    ircSend("PR", "BWBellairs", nickname, hotmask, msg_type, chan, message, command, args)
+    
 def ircSend(type, chan = None, nick = None, *args):
     if type == "PR":
         irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
@@ -84,4 +90,4 @@ def ircSend(type, chan = None, nick = None, *args):
         irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nick, args or "GoodBye").encode("UTF-8"))
 
 def returndata():
-        return (t, nickname, hotmask, msg_type, chan, message, command)
+        return (t, nickname, hotmask, msg_type, chan, message, command, args)
