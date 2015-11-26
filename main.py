@@ -7,12 +7,14 @@ from random import *
 
 modules = {
     "commandRun": False, #True = imported
+    "botCommands": False,
     }
 
 for i in modules:
     try:
         exec("from " + i + " import *", None)
         modules[i] = True
+        print ("module", i, "imported")
     except:
         print ("module not installed")
         modules[i] = False
@@ -82,7 +84,7 @@ def recieve():
                 print (command)
 
             if command:
-                args = command.split()[1:]
+                args = message[1:]
 
     except:
         pass

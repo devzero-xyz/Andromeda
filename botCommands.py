@@ -1,4 +1,4 @@
-from socketS import *
+from main import *
 
 def QUIT():
     ircSend("QUIT")
