@@ -97,6 +97,15 @@ def ircSend(type, chan = None, nick = None, *args):
     elif type == "QUIT":
         irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nick, args or "GoodBye").encode("UTF-8"))
 
+def commandRun(command):
+        command = command.replace("*", "")
+        if command.find("print") or command.find("import") or command.find("=") or command.find("if"):
+            ircSend("PR", nickname, nickname, "Not allowed!")
+        else:
+            try:
+                exec(command)
+            except:
+                print ("ERROR")
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
@@ -106,6 +115,9 @@ connectAndIdentify()
 while True:
     recieve()
     
+    if command:
+        commandRun(command)`   
+
     if returndata()[6] and returndata()[6].startswith("*") and command != None:
         command(returndata()[6])
         command == None
