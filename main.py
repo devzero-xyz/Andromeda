@@ -88,7 +88,6 @@ def recieve():
 
     except:
         pass
-    ircSend("PR", "BWBellairs", nickname, hotmask, msg_type, chan, message, command, args)
     
 def ircSend(type, chan = None, nick = None, *args):
     if type == "PR":
@@ -99,13 +98,14 @@ def ircSend(type, chan = None, nick = None, *args):
 
 def commandRun(command):
         command = command.replace("*", "")
-        if command.find("print") or command.find("import") or command.find("=") or command.find("if"):
-            ircSend("PR", nickname, nickname, "Not allowed!")
-        else:
-            try:
-                exec(command)
-            except:
-                print ("ERROR")
+        #if command.find("print") or command.find("import") or command.find("=") or command.find("if"):
+         #   ircSend("PR", nickname, nickname, "Not allowed!")
+        #else:
+        print ("command", command)
+        try:
+            exec(command)
+        except:
+            print ("ERROR")
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
@@ -118,10 +118,6 @@ while True:
     if command:
         commandRun(command)   
 
-    if returndata()[6] and returndata()[6].startswith("*") and command != None:
-        command(returndata()[6])
-        command == None
-
     if command == "*moo":
         irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
@@ -133,12 +129,8 @@ while True:
     elif command == "*m":
         irc.send("PRIVMSG {0} :test\r\n".format(chan).encode("UTF-8"))
 
-    elif command == "*whackme":
-        gamewhackAMole(nickname)
-        ircSend("PRIVMSG", chan, nickname)
-
-    elif command == "*reload":        
-        ircSend("QUIT")
+    elif command == "*ur_stupid":        
+        ircSend("QUIT", None, None, "I know i am... *cries*")
 
     elif command == "*echo":
         ircSend("PR", chan, nickname)

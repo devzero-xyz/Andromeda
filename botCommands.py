@@ -1,4 +1,5 @@
 from main import *
 
-def QUIT():
+def quit():
     ircSend("QUIT")
+
