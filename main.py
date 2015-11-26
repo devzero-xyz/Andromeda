@@ -116,7 +116,7 @@ while True:
     recieve()
     
     if command:
-        commandRun(command)`   
+        commandRun(command)   
 
     if returndata()[6] and returndata()[6].startswith("*") and command != None:
         command(returndata()[6])
