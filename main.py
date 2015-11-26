@@ -141,7 +141,7 @@ while True:
         ircSend("QUIT")
 
     elif command == "*echo":
-        ircSend("PR", chan, nick)
+        ircSend("PR", chan, nickname)
 
     try:
       print("next")
