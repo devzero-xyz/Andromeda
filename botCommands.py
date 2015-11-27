@@ -22,3 +22,6 @@ def commandS(command, chan, args, nickname, modules):
                 listM += i
         
         ircSend("PR", chan, nickname, listM)
+
+def ok():
+    pass

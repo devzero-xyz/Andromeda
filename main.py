@@ -1,12 +1,11 @@
 from __future__ import print_function
 from time import sleep
-from commandRun import *
 import socket
 import sys
 from random import *
 
 modules = {
-    "commandRun": False, #True = imported
+    #"commandRun": False, #True = imported
     "botCommands": False,
     }
 
@@ -94,7 +93,7 @@ def ircSend(type, chan = None, nickname = None, *args):
         irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
 
     elif type == "QUIT":
-        irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nick, args or "GoodBye").encode("UTF-8"))
+        irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nickname, args or "GoodBye").encode("UTF-8"))
 
 #=========================================================================================#
 #=========================================================================================#
@@ -105,12 +104,32 @@ connectAndIdentify()
 while True:
     recieve()
 
-    if command:
-        commandS(command or None, chan or None, args or None, nickname or None, modules or None)
+    #if command:
+     #   try:
+      #      commandS(command or None, chan or None, args or None, nickname or None, modules or None)
+       # except Exception: print(traceback.format_exc()) 
 
+    if command == "*moo":
+        irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
-    
-    
+    elif command == "*r":
+        ircSend("QUIT")
+        connectAndIdentify()
+        command = None
+
+    elif command == "*m":
+        irc.send("PRIVMSG {0} :test\r\n".format(chan).encode("UTF-8"))
+
+    elif command == "*quit":        
+        ircSend("QUIT", None, None, "I know i am... *cries*")
+
+    elif command == "*list-modules":
+        for i in modules:
+            if modules[i] == True:
+                listM += i
+
+                irc.send("PRIVMSG {0} :nickname, {1}\r\n".format(chan, listM).encode("UTF-8"))
+        
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
