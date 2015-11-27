@@ -89,23 +89,13 @@ def recieve():
     except:
         pass
     
-def ircSend(type, chan = None, nick = None, *args):
+def ircSend(type, chan = None, nickname = None, *args):
     if type == "PR":
         irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
 
     elif type == "QUIT":
         irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nick, args or "GoodBye").encode("UTF-8"))
 
-def commandRun(command):
-        command = command.replace("*", "")
-        #if command.find("print") or command.find("import") or command.find("=") or command.find("if"):
-         #   ircSend("PR", nickname, nickname, "Not allowed!")
-        #else:
-        print ("command", command)
-        try:
-            exec(command)
-        except:
-            print ("ERROR")
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
@@ -114,33 +104,9 @@ connectAndIdentify()
 
 while True:
     recieve()
-    
+
     if command:
-        commandRun(command)   
-
-    if command == "*moo":
-        irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
-
-    elif command == "*r":
-        ircSend("QUIT")
-        connectAndIdentify()
-        command = None
-
-    elif command == "*m":
-        irc.send("PRIVMSG {0} :test\r\n".format(chan).encode("UTF-8"))
-
-    elif command == "*ur_stupid":        
-        ircSend("QUIT", None, None, "I know i am... *cries*")
-
-    elif command == "*echo":
-        ircSend("PR", chan, nickname)
-
-    try:
-      print("next")
-    except UnicodeEncodeError:
-      pass
-
-
+        commandS(command or None, chan or None, args or None, nickname or None, modules or None)
 
 
     
