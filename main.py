@@ -122,7 +122,7 @@ while True:
             if command[2] == "*":
                 irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) * float(command[3])).strip('.0')).encode("UTF-8"))
         except:
-            irc.send("PRIVMSG {0} :{1}, INVALID: arguments. /nUSAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
+                irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
         
 
     elif command[0] == "quit":        
