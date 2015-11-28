@@ -110,19 +110,31 @@ while True:
 
     elif command[0] == "calc":
         try:
+
+            result = 0
+
             if command[2] == "+":
-                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) + float(command[3])).strip('.0')).encode("UTF-8"))
+                result = str(float(command[1]) + float(command[3]))
 
             if command[2] == "-":
-                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) - float(command[3])).strip('.0')).encode("UTF-8"))
+                result = str(float(command[1]) - float(command[3]))
 
             if command[2] == "/":
-                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) / float(command[3])).strip('.0')).encode("UTF-8"))
-
+                result = str(float(command[1]) / float(command[3]))
+                    
             if command[2] == "*":
-                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) * float(command[3])).strip('.0')).encode("UTF-8"))
+                result = str(float(command[1]) * float(command[3]))
+
+            if result.endswith('.0'):
+                result = result[:-2]
+
+            if result == "":
+                result = 0
+
+            irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, result).encode("UTF-8")) 
+
         except:
-                irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
+            irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
         
 
     elif command[0] == "quit":        
