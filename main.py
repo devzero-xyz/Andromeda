@@ -99,6 +99,15 @@ while True:
         mainR("main.py")
         #command = None
 
+    elif command[0] == "echo":
+        irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
+
+    elif command[0] == "join":
+        irc.send("JOIN {0}\r\n".format(",".join(command[1])).encode("UTF-8"))
+
+    elif command[0] == "leave":
+        irc.send("PART {0}\r\n".format(",".join(command[1])).encode("UTF-8"))
+
     elif command[0] == "calc":
         try:
             if command[2] == "+":
@@ -117,7 +126,7 @@ while True:
         
 
     elif command[0] == "quit":        
-        ircSend("QUIT", None, None, "I know i am... *cries*")
+        ircSend("QUIT", None, None, "")
         import sys; sys.exit()
 
     elif command == "list-modules":
