@@ -1,24 +1,10 @@
 from __future__ import print_function
 from time import sleep
 import socket
-import sys
 from random import *
 
 modules = {
-    #"commandRun": False, #True = imported
-    "botCommands": False,
-    }
-
-for i in modules:
-    try:
-        exec("from " + i + " import *", None)
-        modules[i] = True
-        print ("module", i, "imported")
-    except:
-        print ("module not installed")
-        modules[i] = False
-
-print (modules)
+    } #Module = True/imported
 
 server = "chat.freenode.net"
 port = 6667
@@ -28,7 +14,7 @@ realname = "BWBellairs[Bot]"
 ident = "BWBellairs[Bot]"
 password = "[REDACTED]]"
 username = "BWBellairs[Bot]"
-command = ""
+command = "$None$"
 
 def connectAndIdentify():
 
@@ -60,73 +46,84 @@ def recieve():
     print (t)
     # Listen for PING
 
-    try:
-        if t[0] == "PING":
-            # Respond with PONG
-            irc.send("PONG\r\n".encode("UTF-8"))
+    command = "$None%"
 
+    if t[0] == "PING":
+        # Respond with PONG
+        irc.send("PONG\r\n".encode("UTF-8"))
 
-        
-        elif "!" in t[0]:
-            nickname = t[0].split("!")[0] 
-            nickname = nickname.replace(":", "")
-            hostmask = t[0]
-            msg_type = t[1]
-            chan = t[2]
-            message = t[3:]
-            
-            
-            if message:
-                message[0] = message[0][0:]
-                command = message[0].lower()
-                command = str(command)
-                print (command)
+    elif "!" in t[0]:
+        nickname = t[0].split("!")[0]
+        nickname = nickname.replace(":", "")
+        hostmask = t[0]
+        msg_type = t[1]
+        chan = t[2]
+        message = t[3:]
 
-            if command:
-                args = message[1:]
-
-    except:
-        pass
+        if message and message[0].startswith("*"):
+            command = " ".join(message).split()
+            command[0] = command[0].replace("*", "")
+            print("cmd", command)
     
 def ircSend(type, chan = None, nickname = None, *args):
-    if type == "PR":
-        irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
+    try:
+        if type == "PR":
+            irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
 
-    elif type == "QUIT":
-        irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nickname, args or "GoodBye").encode("UTF-8"))
+        elif type == "QUIT":
+            irc.send("QUIT {0} :{1}\r\n".format(chan or channels[randint(0,(len(channels))- 1)], nickname, args or "GoodBye").encode("UTF-8"))
+    except:
+        pass
 
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
 
+ircSend("QUIT") #In case of the bot being reloaded
 connectAndIdentify()
 
 while True:
     recieve()
-
+    print ("cooliooooooooooooooooooooo")
     #if command:
      #   try:
       #      commandS(command or None, chan or None, args or None, nickname or None, modules or None)
        # except Exception: print(traceback.format_exc()) 
 
-    if command == "*moo":
+    if command[0] == "moo":
         irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
-    elif command == "*r":
+    elif command[0] == "r":
         ircSend("QUIT")
-        connectAndIdentify()
-        command = None
+        from mainReload import mainR
+        mainR("main.py")
+        #command = None
 
-    elif command == "*m":
-        irc.send("PRIVMSG {0} :test\r\n".format(chan).encode("UTF-8"))
+    elif command[0] == "calc":
+        try:
+            if command[2] == "+":
+                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) + float(command[3])).strip('.0')).encode("UTF-8"))
 
-    elif command == "*quit":        
+            if command[2] == "-":
+                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) - float(command[3])).strip('.0')).encode("UTF-8"))
+
+            if command[2] == "/":
+                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) / float(command[3])).strip('.0')).encode("UTF-8"))
+
+            if command[2] == "*":
+                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, str(float(command[1]) * float(command[3])).strip('.0')).encode("UTF-8"))
+        except:
+            irc.send("PRIVMSG {0} :{1}, INVALID: arguments. /nUSAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
+        
+
+    elif command[0] == "quit":        
         ircSend("QUIT", None, None, "I know i am... *cries*")
+        import sys; sys.exit()
 
-    elif command == "*list-modules":
+    elif command == "list-modules":
         for i in modules:
             if modules[i] == True:
-                listM += i
+                listM + i
 
                 irc.send("PRIVMSG {0} :nickname, {1}\r\n".format(chan, listM).encode("UTF-8"))
         
