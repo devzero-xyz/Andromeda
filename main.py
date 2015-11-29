@@ -15,11 +15,6 @@ ident = "BWBellairs[Bot]"
 password = "[REDACTED]]"
 username = "BWBellairs[Bot]"
 command = "$None$"
-nickname = "BWBellairs[Bot]"
-stats = {
-    "BWBellairs[Bot]": "1",
-    "BWBellairs": "1",
-    }
 
 def connectAndIdentify():
 
@@ -89,66 +84,70 @@ connectAndIdentify()
 
 while True:
     recieve()
+    print ("cooliooooooooooooooooooooo")
+    #if command:
+     #   try:
+      #      commandS(command or None, chan or None, args or None, nickname or None, modules or None)
+       # except Exception: print(traceback.format_exc()) 
 
-    try:
-        if stats[nickname] == "0" or stats[nickname] == "1":
-            if command[0] == "moo":
-                irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
+    if command[0] == "moo":
+        irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
-            elif command[0] == "echo":
-                irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
+    elif command[0] == "r":
+        ircSend("QUIT")
+        from mainReload import mainR
+        mainR("main.py")
+        #command = None
 
-            elif command[0] == "calc":
-                try:
+    elif command[0] == "echo":
+        irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
 
-                    result = 0
+    elif command[0] == "join":
+        irc.send("JOIN {0}\r\n".format(",".join(command[1])).encode("UTF-8"))
 
-                    if command[2] == "+":
-                        result = str(float(command[1]) + float(command[3]))
+    elif command[0] == "leave":
+        irc.send("PART {0}\r\n".format(",".join(command[1])).encode("UTF-8"))
 
-                    if command[2] == "-":
-                        result = str(float(command[1]) - float(command[3]))
+    elif command[0] == "calc":
+        try:
 
-                    if command[2] == "/":
-                        result = str(float(command[1]) / float(command[3]))
-                            
-                    if command[2] == "*":
-                        result = str(float(command[1]) * float(command[3]))
+            result = 0
 
-                    if result.endswith('.0'):
-                        result = result[:-2]
+            if command[2] == "+":
+                result = str(float(command[1]) + float(command[3]))
 
-                    if result == "":
-                        result = 0
+            if command[2] == "-":
+                result = str(float(command[1]) - float(command[3]))
 
-                    irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, result).encode("UTF-8")) 
+            if command[2] == "/":
+                result = str(float(command[1]) / float(command[3]))
+                    
+            if command[2] == "*":
+                result = str(float(command[1]) * float(command[3]))
 
-                except:
-                    irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
-            
-        if stats[nickname] == "1":
-            if command[0] == "join":
-                irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
+            if result.endswith('.0'):
+                result = result[:-2]
 
-            elif command[0] == "leave":
-                irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
+            if result == "":
+                result = 0
 
-            elif command[0] == "quit":        
-                ircSend("QUIT", None, None, "")
-                import sys; sys.exit()
+            irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, result).encode("UTF-8")) 
 
-            elif command[0] == "permissions" and command[2] == "=":
-                try:
-                    if command[3] == "1" or command[3] == "0":
-                        stats[command[1]] = command[3]
-                        irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
-                    else:
-                        irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
-                except:
-                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
+        except:
+            irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
+        
 
-    except:
-        pass
+    elif command[0] == "quit":        
+        ircSend("QUIT", None, None, "")
+        import sys; sys.exit()
+
+    elif command == "list-modules":
+        for i in modules:
+            if modules[i] == True:
+                listM + i
+
+                irc.send("PRIVMSG {0} :nickname, {1}\r\n".format(chan, listM).encode("UTF-8"))
+        
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
