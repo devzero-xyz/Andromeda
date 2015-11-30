@@ -137,13 +137,21 @@ while True:
                 ircSend("QUIT", None, None, "")
                 import sys; sys.exit()
 
+            elif command[0] == "kick":
+                if command[1]:
+                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!chan = "+ chan)
+                    irc.send("KICK {0} {1} :{2}\r\n".format(chan, command[1], command[2:] or command[1]).encode("UTF-8"))
+                    
+                else:
+                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8")) 
+
             elif command[0] == "permissions" and command[2] == "=":
                 try:
                     if command[3] == "1" or command[3] == "0":
                         stats[command[1]] = command[3]
                         irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
                     else:
-                        irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
+                        irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
                 except:
                     irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
 
