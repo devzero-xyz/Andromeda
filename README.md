@@ -8,4 +8,4 @@ If your interestes in the bot or just spot something that you don't think is rig
  	Push your own commits the the main repo.
   
 Thanks,
-	##BWBellairs
+	BWBellairs
