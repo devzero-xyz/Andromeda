@@ -156,14 +156,14 @@ while True:
                     irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "op":
-                if command[1] == "":
-                    irc.send("MODE {0} +o {1} :\r\n".format(chan, nickname).encode("UTF-8"))
+                if not command[1]:
+                    irc.send("MODE {0} +o {1}\r\n".format(chan, nickname).encode("UTF-8"))
 
                 elif command[1]:
-                    irc.send("MODE {0} +o {1} :\r\n".format(chan, command[1]).encode("UTF-8"))
+                    irc.send("MODE {0} +o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
             elif command[0] == "deop":
-                if command[1] == "":
+                if not command[1]:
                     irc.send("MODE {0} -o {1} :\r\n".format(chan, nickname).encode("UTF-8"))
 
                 elif command[1]:
