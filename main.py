@@ -6,22 +6,23 @@ from random import *
 modules = {
     } #Module = True/imported
 
-server = "chat.freenode.net"
-port = 6667
-channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
-botnick = "BWBellairs[Bot]"
-realname = "BWBellairs[Bot]"
-ident = "BWBellairs[Bot]"
-password = "[REDACTED]]"
-username = "BWBellairs[Bot]"
-command = "$None$"
-nickname = "BWBellairs[Bot]"
 stats = {
     "BWBellairs[Bot]": "1",
     "BWBellairs": "1",
     }
 
 def connectAndIdentify():
+
+    server = "chat.freenode.net"
+    port = 6667
+    channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
+    botnick = "BWBellairs[Bot]"
+    realname = "BWBellairs[Bot]"
+    ident = "BWBellairs[Bot]"
+    password = raw_input("Enter password")
+    username = "BWBellairs[Bot]"
+    command = "$None$"
+    nickname = "BWBellairs[Bot]"
 
     global irc
 
@@ -135,15 +136,7 @@ while True:
 
             elif command[0] == "quit":        
                 ircSend("QUIT", None, None, "")
-                import sys; sys.exit()
-
-            elif command[0] == "kick":
-                if command[1]:
-                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!chan = "+ chan)
-                    irc.send("KICK {0} {1} :{2}\r\n".format(chan, command[1], command[2:] or command[1]).encode("UTF-8"))
-                    
-                else:
-                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8")) 
+                import sys; sys.exit() 
 
             elif command[0] == "permissions" and command[2] == "=":
                 try:
@@ -154,6 +147,27 @@ while True:
                         irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
                 except:
                     irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
+
+            elif command[0] == "kick":
+                if command[1]:
+                    irc.send("KICK {0} {1} :{2}\r\n".format(chan, command[1], " ".join(command[2:]) or command[1]).encode("UTF-8"))
+
+                else:
+                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8"))
+
+            elif command[0] == "op":
+                if not command[1]:
+                    irc.send("MODE {0} +o {1} :\r\n".format(chan, nickname).encode("UTF-8"))
+
+                elif command[1]:
+                    irc.send("MODE {0} +o {1} :\r\n".format(chan, command[1]).encode("UTF-8"))
+
+            elif command[0] == "deop":
+                if not command[1]:
+                    irc.send("MODE {0} -o {1} :\r\n".format(chan, nickname).encode("UTF-8"))
+
+                elif command[1]:
+                    irc.send("MODE {0} -o {1} :\r\n".format(chan, command[1] or nickname).encode("UTF-8"))
 
     except:
         pass
