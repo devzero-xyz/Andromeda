@@ -115,7 +115,7 @@ while True:
     recieve()
 
     try:
-        if stats[nickname] == "0" or stats[nickname] == "1":
+        if command[0]:
             if command[0] == "moo":
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
@@ -185,6 +185,12 @@ while True:
             elif command[0] == "deop":
                 if command[1]:
                     irc.send("MODE {0} -o {1} :\r\n".format(chan, command[1] or nickname).encode("UTF-8"))
+
+            elif command[0] == "ban":
+                irc.send("MODE {0} +b {1}\r\n".format(chan, command[1]).encode("UTF-8"))
+
+            elif command[0] == "unban":
+                irc.send("MODE {0} -b {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
     except:
         pass
