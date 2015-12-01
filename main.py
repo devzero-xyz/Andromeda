@@ -60,7 +60,7 @@ def connectAndIdentify():
 
     irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
 
-def recieve():
+def recieve(commandNone = False):
 
     global t, nickname, hotmask, msg_type, chan, message, command, args
     
@@ -75,7 +75,8 @@ def recieve():
     print (t)
     # Listen for PING
 
-    command = "$None%"
+    if commandNone == False:
+        command = "$None%"
 
     if t[0] == "PING":
         # Respond with PONG
@@ -186,11 +187,27 @@ while True:
                 if command[1]:
                     irc.send("MODE {0} -o {1} :\r\n".format(chan, command[1] or nickname).encode("UTF-8"))
 
+            elif command[0] == "sop":
+                irc.send("PRIVMSG ChanServ :OP {0}\r\n".format(chan).encode("UTF-8"))
+
+            elif command[0] == "sdeop":
+                irc.send("PRIVMSG ChanServ :DEOP {0}\r\n".format(chan).encode("UTF-8"))
+
             elif command[0] == "ban":
-                irc.send("MODE {0} +b {1}\r\n".format(chan, command[1]).encode("UTF-8"))
+                irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
+                recieve(True)
+                irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
 
             elif command[0] == "unban":
-                irc.send("MODE {0} -b {1}\r\n".format(chan, command[1]).encode("UTF-8"))
+                irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
+                recieve(True)
+                irc.send("MODE {0} -b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+
+            elif command[0] == "kban":
+                irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
+                recieve(True)
+                irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+                irc.send("KICK {0} {1} :{2}\r\n".format(chan, t[7], " ".join(command[2:]) or "Kicked/moo", nickname).encode("UTF-8"))
 
     except:
         pass
