@@ -103,7 +103,7 @@ def ircSend(type, chan = None, nickname = None, *args):
         elif type == "QUIT":
             irc.send("QUIT {0} :{1}\r\n".format(chan, nickname, args or "GoodBye").encode("UTF-8"))
     except:
-        pass
+        pass        
 
 #=========================================================================================#
 #=========================================================================================#
@@ -114,7 +114,7 @@ connectAndIdentify()
 
 while True:
     recieve()
-
+    
     try:
         if command[0]:
             if command[0] == "moo":
@@ -158,10 +158,14 @@ while True:
             elif command[0] == "leave":
                 irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
 
-            elif command[0] == "quit":        
-                ircSend("QUIT", None, None, "")
-                import sys; sys.exit() 
+            elif command[0] == "quit":
+                if len(command) > 1:
+                    irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
 
+                else:
+                    irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
+
+                    
             elif command[0] == "permissions" and command[2] == "=":
                 try:
                     if command[3] == "1" or command[3] == "0":
