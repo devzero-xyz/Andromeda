@@ -13,6 +13,14 @@ stats = {
     "BWBellairs": "1",
     }
 
+channelLinks = {
+    }
+
+bans = {
+    }
+
+startup = False
+
 def connectAndIdentify():
 
     server = "chat.freenode.net"
@@ -95,15 +103,41 @@ def recieve(commandNone = False):
             command[0] = command[0].replace("*", "")
             print("cmd", command)
     
-def ircSend(type, chan = None, nickname = None, *args):
+def ircSend(typeM, chan = None, nickname = None, *args):
     try:
-        if type == "PR":
+        if typeM == "PR":
             irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
 
-        elif type == "QUIT":
+        elif typeM == "QUIT":
             irc.send("QUIT {0} :{1}\r\n".format(chan, nickname, args or "GoodBye").encode("UTF-8"))
+
+        elif typeM == "topic":
+            pass
     except:
-        pass        
+        pass
+
+def channelLink(cmd = None, channelA = None, channelB = None):
+    if cmd == "add":
+        try:
+            channelLinks[channelA] = channelB
+            irc.send("PRIVMSG {0} :Channels [{0}] and {1} successfully linked\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+
+        except:
+            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] have failed to link\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+
+    elif cmd == "remove":
+        try:
+            channelLinks.remove(channelA)
+            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] successfully are now unlinked\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+        except:
+            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] have failed to unlink\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+
+    else:
+        for i in channelLinks:
+            if i == chan:
+                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(channelLinks[i], i, nickname, " ".join(message)).encode("UTF-8"))
+            elif channelLinks[i] == chan:
+                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
 
 #=========================================================================================#
 #=========================================================================================#
@@ -112,8 +146,14 @@ def ircSend(type, chan = None, nickname = None, *args):
 ircSend("QUIT") #In case of the bot being reloaded
 connectAndIdentify()
 
+def ownChan():
+    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is available\r\n".encode("UTF-8"))
+    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now active\r\n".encode("UTF-8"))
+
+
 while True:
     recieve()
+    channelLink()
     
     try:
         if command[0]:
@@ -121,7 +161,7 @@ while True:
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "echo":
-                irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+grey ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green" , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
 
             elif command[0] == "calc":
                 try:
@@ -160,11 +200,16 @@ while True:
 
             elif command[0] == "quit":
                 if len(command) > 1:
+                    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is unavailable\r\n".encode("UTF-8"))
+                    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
 
                 else:
+                    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is unavailable\r\n".encode("UTF-8"))
+                    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
 
+                
                     
             elif command[0] == "permissions" and command[2] == "=":
                 try:
@@ -201,11 +246,14 @@ while True:
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
                 recieve(True)
                 irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+                bans[command[1]] = t[5]
 
             elif command[0] == "unban":
-                irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
-                recieve(True)
-                irc.send("MODE {0} -b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+                try:
+                    irc.send("MODE {0} -b {1}\r\n".format(chan, bans[command[1]]).encode("UTF-8"))
+                    my_dict.pop(command[1], None)
+                except:
+                    pass
 
             elif command[0] == "kban":
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
@@ -213,6 +261,22 @@ while True:
                 irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
                 irc.send("KICK {0} {1} :{2}\r\n".format(chan, t[7], " ".join(command[2:]) or "Kicked/moo", nickname).encode("UTF-8"))
 
+            elif command[0] == "channel" and command[1] == "links":
+                channelLink(command[2], command[3], command[4])
+
+            if t[1] == "+Zi":
+                startup = 0
+
+            try:
+                startup += 1
+                print (startup)
+                if startup == 5:
+                    ownChan()
+                    startup == "STOP"
+
+            except:
+                pass
+                
     except:
         pass
 #=========================================================================================#
