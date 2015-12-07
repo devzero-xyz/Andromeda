@@ -290,6 +290,9 @@ while True:
             elif command[0] == "raw":
                 exec(raw_input("Enter command"))
 
+            elif command[0] == "action":
+                irc.send("PRIVMSG {0} :\x01ACTION {1}\x01\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
+
                 
     except:
         pass
