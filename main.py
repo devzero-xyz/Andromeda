@@ -95,8 +95,9 @@ def recieve(commandNone = False):
         nickname = nickname.replace(":", "")
         hostmask = t[0]
         msg_type = t[1]
-        chan = t[2]
-        message = t[3:]
+        if len(t) >= 2:
+            chan = t[2]
+            message = t[3:]
 
         if message and message[0].startswith("*"):
             command = " ".join(message).split()
