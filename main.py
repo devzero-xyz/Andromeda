@@ -6,6 +6,7 @@ import ssl
 from random import *
 
 modules = {
+    "last": True,
     } #Module = True/imported
 
 stats = {
@@ -140,13 +141,30 @@ def channelLink(cmd = None, channelA = None, channelB = None):
             elif channelLinks[i] == chan:
                 irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
 
+def last(nickname = None, cmd = False):
+    nicks = {}
+
+    if cmd == "help":
+        irc.send("PRIVMSG {0} :{1} Sends a memo to the nickname containg msgs sent by other nicks highlighting them. This will be sent when the user types *last send\r\n".format(chan, nickname).encode("UTF-8"))
+
+    if cmd == "add":
+        nicks[nickname] == []
+
+    if cmd == "send":
+        irc.send("MemoServ SEND :{0} {1}\r\n".format(nickname, nicks[nickname]).encode("UTF-8"))
+
+    if cmd == "refresh":
+        for i in nicks:
+            if i in message:
+                nicks[i].append[message] + " "
+
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
 
 ircSend("QUIT") #In case of the bot being reloaded
 connectAndIdentify()
-
+ 
 def ownChan():
     irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is available\r\n".encode("UTF-8"))
     irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now active\r\n".encode("UTF-8"))
@@ -155,14 +173,18 @@ def ownChan():
 while True:
     recieve()
     channelLink()
+    last(None, "refresh")
     
     try:
         if command[0]:
             if command[0] == "moo":
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
+            elif command[0] == "last":
+                last(nickname, command[1])
+
             elif command[0] == "echo":
-                irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+grey ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green" , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+                irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
 
             elif command[0] == "calc":
                 try:
@@ -267,6 +289,9 @@ while True:
 
             if t[1] == "+Zi":
                 startup = 0
+
+            elif command[0] == "raw":
+                exec(raw_input("Enter command"))
 
             try:
                 startup += 1
