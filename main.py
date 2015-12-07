@@ -97,7 +97,11 @@ def recieve(commandNone = False):
         hostmask = t[0]
         msg_type = t[1]
         if len(t) >= 2:
-            chan = t[2]
+            if t[2].startswith("#"):
+                chan = t[2]
+            else:
+                chan = nickname
+
             message = t[3:]
 
         if message and message[0].startswith("*"):
@@ -164,11 +168,6 @@ def last(nickname = None, cmd = False):
 
 ircSend("QUIT") #In case of the bot being reloaded
 connectAndIdentify()
- 
-def ownChan():
-    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is available\r\n".encode("UTF-8"))
-    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now active\r\n".encode("UTF-8"))
-
 
 while True:
     recieve()
@@ -184,7 +183,7 @@ while True:
                 last(nickname, command[1])
 
             elif command[0] == "echo":
-                irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+                irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
 
             elif command[0] == "calc":
                 try:
@@ -223,12 +222,10 @@ while True:
 
             elif command[0] == "quit":
                 if len(command) > 1:
-                    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is unavailable\r\n".encode("UTF-8"))
                     irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
 
                 else:
-                    irc.send("TOPIC ##BWBellairs :The home of BWBellairs; To contact me if I'm offline, please execute /ms SEND BWBellairs [Message] in the chat window; BWBellairs[Bot] is unavailable\r\n".encode("UTF-8"))
                     irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
 
@@ -293,15 +290,6 @@ while True:
             elif command[0] == "raw":
                 exec(raw_input("Enter command"))
 
-            try:
-                startup += 1
-                print (startup)
-                if startup == 5:
-                    ownChan()
-                    startup == "STOP"
-
-            except:
-                pass
                 
     except:
         pass
