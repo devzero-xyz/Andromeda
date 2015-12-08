@@ -173,6 +173,9 @@ while True:
     recieve()
     channelLink()
     last(None, "refresh")
+
+    if t[1] == "KICK" and t[3] == "BWBellairs[Bot]":
+        irc.send("JOIN {0}\r\n".format(t[2]).encode("UTF-8"))
     
     try:
         if command[0]:
@@ -184,6 +187,15 @@ while True:
 
             elif command[0] == "echo":
                 irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+
+            elif command[0] == "bug":
+                if len(command) >= 2:
+                    bugs = open("Bugs.txt", "a")
+                    bugs.write(nickname + " :" + " ".join(command[1:]) + "\n")
+                    irc.send("PRIVMSG {0} :{1}, Bug has been reported\r\n".format(chan, nickname).encode("UTF-8"))
+                    bugs.close()
+                else:
+                    irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "calc":
                 try:
@@ -280,6 +292,7 @@ while True:
                 recieve(True)
                 irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
                 irc.send("KICK {0} {1} :{2}\r\n".format(chan, t[7], " ".join(command[2:]) or "Kicked/moo", nickname).encode("UTF-8"))
+                bans[command[1]] = t[5]
 
             elif command[0] == "channel" and command[1] == "links":
                 channelLink(command[2], command[3], command[4])
