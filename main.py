@@ -284,12 +284,6 @@ while True:
             elif command[0] == "channel" and command[1] == "links":
                 channelLink(command[2], command[3], command[4])
 
-            if t[1] == "+Zi":
-                startup = 0
-
-            elif command[0] == "raw":
-                exec(raw_input("Enter command"))
-
             elif command[0] == "action":
                 irc.send("PRIVMSG {0} :\x01ACTION {1}\x01\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
 
