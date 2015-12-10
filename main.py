@@ -6,10 +6,31 @@ import ssl
 from random import *
 
 modules = {
-    "last": True,
+    "irc ircRelay": True,
     } #Module = True/imported
 
-stats = {
+for i in modules:
+    if len(i) >= 2:
+        moduleInfo = i.split()
+        moduleLocation = moduleInfo[0]
+        moduleForImport = moduleInfo[1]
+        try:
+            exec("from i " + moduleLocation + " import " + moduleForImport)
+            print ("Module " + moduleForImport + " from "  + moduleLocation + " has been imported")
+
+        except:
+            print ("Module " + moduleForImport + " from " + moduleLocation + " could not be imported")
+
+    else:
+        try:
+            exec("import " + i)
+            print ("Module " + moduleForImport + " has been imported")
+
+        except:
+            print ("Module " + moduleForImport + " could not be imported")
+        
+
+stats = {#Change to perms
     "BWBellairs[Bot]": "1",
     "BWBellairs": "1",
     }
@@ -20,130 +41,36 @@ channelLinks = {
 bans = {
     }
 
-startup = False
-
-def connectAndIdentify():
-
-    server = "chat.freenode.net"
-    port = 6697
-    channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
-    botnick = "BWBellairs[Bot]"
-    realname = "BWBellairs[Bot]"
-    ident = "BWBellairs[Bot]"
-    use_ssl = True
-    use_sasl = True
-    password = raw_input("Enter password")
-    username = "BWBellairs[Bot]"
-    command = "$None$"
-    nickname = "BWBellairs[Bot]"
-
-    global irc
-
-    irc = None
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # defines the socket
-    if use_ssl:
-        irc = ssl.wrap_socket(sock)
-    else:
-        irc = sock
-
-    print("connecting to: " + server)
-    irc.connect((server, port))  # connects to the server
-
-    if use_sasl:
-        saslstring = b64encode("{0}\x00{0}\x00{1}".format(
-                	username, password).encode("UTF-8")) 
-        irc.send("CAP REQ :sasl\r\n".format("UTF-8"))
-        irc.send("USER {0} {1} blah :{2}\r\n".format(
-                ident, botnick, realname).encode("UTF-8"))
-        irc.send("NICK {0}\r\n".format(botnick).encode("UTF-8"))
-        irc.send("AUTHENTICATE PLAIN\r\n".encode("UTF-8"))
-        irc.send("AUTHENTICATE {0}\r\n".format(saslstring).encode(
-                "UTF-8"))
-        irc.send("CAP END\r\n".encode("UTF-8"))
-    else:
-        irc.send("USER {0} {1} blah :{2}\r\n".format(
-                ident, botnick, realname).encode("UTF-8"))  # user authentication
-        irc.send("NICK {0}\r\n".format(botnick).encode("UTF-8"))  # sets nick
-        irc.send("PRIVMSG nickserv :identify {0} {1}\r\n".format(
-                username, password).encode("UTF-8"))  # auth
-
-    irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
-
-def recieve(commandNone = False):
-
-    global t, nickname, hotmask, msg_type, chan, message, command, args
-    
-    binary_data = irc.recv(1024)
-    # Decode data from UTF-8
-    #data = binary_data.decode("UTF-8", "ignore")
-    data = binary_data
-    # Split data by spaces
-    t = data.replace(":", "")#.split()
-    t = t.split()
-    
-    print (t)
-    # Listen for PING
-
-    if commandNone == False:
-        command = "$None%"
-
-    if t[0] == "PING":
-        # Respond with PONG
-        irc.send("PONG\r\n".encode("UTF-8"))
-
-    elif "!" in t[0]:
-        nickname = t[0].split("!")[0]
-        nickname = nickname.replace(":", "")
-        hostmask = t[0]
-        msg_type = t[1]
-        if len(t) >= 2:
-            if t[2].startswith("#"):
-                chan = t[2]
-            else:
-                chan = nickname
-
-            message = t[3:]
-
-        if message and message[0].startswith("*"):
-            command = " ".join(message).split()
-            command[0] = command[0].replace("*", "")
-            print("cmd", command)
-    
-def ircSend(typeM, chan = None, nickname = None, *args):
-    try:
-        if typeM == "PR":
-            irc.send("PRIVMSG {0} :{1} {2}\r\n".format(chan, nickname or args, args or "").encode("UTF-8"))
-
-        elif typeM == "QUIT":
-            irc.send("QUIT {0} :{1}\r\n".format(chan, nickname, args or "GoodBye").encode("UTF-8"))
-
-        elif typeM == "topic":
-            pass
-    except:
-        pass
-
 def channelLink(cmd = None, channelA = None, channelB = None):
-    if cmd == "add":
+    ChannelsChans = "This shows links in progress to the user"
+
+    if cmd == "show":
+        for i in channelLinks:
+            ChannelsChans = ChannelsChans + channelLinks[i] + " = " + i + ", "
+            
+        irc.send("PRIVMSG {0} :Channel currently linked are: {1}\r\n".format(chan, ChannelsChans).encode("UTF-8"))
+
+    elif cmd == "add":
         try:
             channelLinks[channelA] = channelB
-            irc.send("PRIVMSG {0} :Channels [{0}] and {1} successfully linked\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :Channels successfully linked\r\n".format(chan).encode("UTF-8"))
 
         except:
-            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] have failed to link\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :Channels failed to link\r\n".format(chan).encode("UTF-8"))
 
     elif cmd == "remove":
         try:
-            channelLinks.remove(channelA)
-            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] successfully are now unlinked\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+            del channelLinks[channelA]
+            irc.send("PRIVMSG {0} :Channels successfully unlinked\r\n".format(chan).encode("UTF-8"))
         except:
-            irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] have failed to unlink\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :Channels failed to unlink\r\n".format(chan).encode("UTF-8"))
 
     else:
         for i in channelLinks:
             if i == chan:
-                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(channelLinks[i], i, nickname, " ".join(message)).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :[{1}] {2}: {3}\r\n".format(channelLinks[i], i, nickname, " ".join(message)).encode("UTF-8"))
             elif channelLinks[i] == chan:
-                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :[{1}] {2}: {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
 
 def last(nickname = None, cmd = False):
     nicks = {}
