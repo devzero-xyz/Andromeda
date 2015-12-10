@@ -1,15 +1,30 @@
 from __future__ import print_function
-from base64 import b64encode
 from time import sleep
-import socket
-import ssl
 from random import *
+
+#This dictionary works like this
+#
+#If the length of the string is more than to then that means there's a package to import FROM
+#otherwise its located at where the source folder is at and will only perform a import
+#A module is classed as being False/Not imported until it is
+#Use ; to import more more from that module
+#e.g. from test import foo; bar
+
+ImportantModules = {
+                    "ircSockets ircHandling": "False"
+                    }
+
+for i in ImportantModule:
+    if len(i) >= 2:
+        i = i.split()
+        exec("from " + ImportantModules[i][0] + " import " + ImportantModules[i][1])
+        print ("Module", ImportantModules[i][1], "from", ImportantModules[i][0], "imported")
 
 modules = {
     "last": True,
     } #Module = True/imported
 
-stats = {
+stats = {#Change to perms "Admin" Owner and User
     "BWBellairs[Bot]": "1",
     "BWBellairs": "1",
     }
@@ -21,53 +36,6 @@ bans = {
     }
 
 startup = False
-
-def connectAndIdentify():
-
-    server = "chat.freenode.net"
-    port = 6697
-    channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
-    botnick = "BWBellairs[Bot]"
-    realname = "BWBellairs[Bot]"
-    ident = "BWBellairs[Bot]"
-    use_ssl = True
-    use_sasl = True
-    password = raw_input("Enter password")
-    username = "BWBellairs[Bot]"
-    command = "$None$"
-    nickname = "BWBellairs[Bot]"
-
-    global irc
-
-    irc = None
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # defines the socket
-    if use_ssl:
-        irc = ssl.wrap_socket(sock)
-    else:
-        irc = sock
-
-    print("connecting to: " + server)
-    irc.connect((server, port))  # connects to the server
-
-    if use_sasl:
-        saslstring = b64encode("{0}\x00{0}\x00{1}".format(
-                	username, password).encode("UTF-8")) 
-        irc.send("CAP REQ :sasl\r\n".format("UTF-8"))
-        irc.send("USER {0} {1} blah :{2}\r\n".format(
-                ident, botnick, realname).encode("UTF-8"))
-        irc.send("NICK {0}\r\n".format(botnick).encode("UTF-8"))
-        irc.send("AUTHENTICATE PLAIN\r\n".encode("UTF-8"))
-        irc.send("AUTHENTICATE {0}\r\n".format(saslstring).encode(
-                "UTF-8"))
-        irc.send("CAP END\r\n".encode("UTF-8"))
-    else:
-        irc.send("USER {0} {1} blah :{2}\r\n".format(
-                ident, botnick, realname).encode("UTF-8"))  # user authentication
-        irc.send("NICK {0}\r\n".format(botnick).encode("UTF-8"))  # sets nick
-        irc.send("PRIVMSG nickserv :identify {0} {1}\r\n".format(
-                username, password).encode("UTF-8"))  # auth
-
-    irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
 
 def recieve(commandNone = False):
 
