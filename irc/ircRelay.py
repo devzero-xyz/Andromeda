@@ -7,7 +7,7 @@ def connectAndIdentify():
 
     server = "chat.freenode.net"
     port = 6697
-    channels = ["#botters-test"]
+    channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
     botnick = "BWBellairs[Bot]"
     realname = "BWBellairs[Bot]"
     ident = "BWBellairs[Bot]"
