@@ -59,7 +59,14 @@ def connectAndIdentify():
         irc.send("AUTHENTICATE PLAIN\r\n".encode("UTF-8"))
         irc.send("AUTHENTICATE {0}\r\n".format(saslstring).encode(
                 "UTF-8"))
-        irc.send("CAP END\r\n".encode("UTF-8"))
+        authed = confirmsasl()
+        if authed:
+            irc.send("CAP END\r\n".encode("UTF-8"))
+        else:
+            print("SASL aborted. exiting.")
+            irc.send("QUIT\r\n")
+            irc.shutdown(2)
+            exit()
     else:
         irc.send("USER {0} {1} blah :{2}\r\n".format(
                 ident, botnick, realname).encode("UTF-8"))  # user authentication
@@ -68,6 +75,19 @@ def connectAndIdentify():
                 username, password).encode("UTF-8"))  # auth
 
     irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
+
+def confirmsasl():
+    while True:
+        ircmsg = irc.recv(2048)
+        ircmsg = ircmsg.split()
+        print(ircmsg)
+        ircmsg = " ".join(ircmsg)
+        success = ":SASL authentication successful"
+        failure = ":SASL authentication aborted"
+        if success in ircmsg:
+                return True
+        elif failure in ircmsg:
+                return False
 
 def recieve(commandNone = False):
 
