@@ -117,7 +117,7 @@ def recieve(commandNone = False):
         hostmask = t[0]
         msg_type = t[1]
         if len(t) >= 2:
-            if t[2].startswith("#"):
+            if t[2] and t[2].startswith("#"):
                 chan = t[2]
             else:
                 chan = nickname
