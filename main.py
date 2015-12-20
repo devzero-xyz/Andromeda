@@ -153,7 +153,7 @@ def channelLink(cmd = None, channelA = None, channelB = None):
 
     elif cmd == "remove":
         try:
-            channelLinks.remove(channelA)
+            del channelLinks[channelA]
             irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] successfully are now unlinked\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
         except:
             irc.send("PRIVMSG {0} :Channels [{0}] and [{1}] have failed to unlink\r\n".format(i, channelLinks[i], nickname, message).encode("UTF-8"))
@@ -303,7 +303,7 @@ while True:
             elif command[0] == "unban":
                 try:
                     irc.send("MODE {0} -b {1}\r\n".format(chan, bans[command[1]]).encode("UTF-8"))
-                    my_dict.pop(command[1], None)
+                    del bans[command[1]]
                 except:
                     pass
 
