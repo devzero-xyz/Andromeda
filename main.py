@@ -1,6 +1,6 @@
 from __future__ import print_function
 from base64 import b64encode
-from time import sleep
+from time import sleep, time
 import socket
 import ssl
 from random import *
@@ -204,6 +204,9 @@ while True:
 
             elif command[0] == "last":
                 last(nickname, command[1])
+
+            if command[0] == "time":
+                irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, time()).encode("UTF-8"))
 
             elif command[0] == "echo":
                 irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
