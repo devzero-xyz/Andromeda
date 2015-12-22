@@ -353,24 +353,26 @@ while True:
             elif command[0] == "action":
                 irc.send("PRIVMSG {0} :\x01ACTION {1}\x01\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
 
-            if command[0] == "voice":
+            elif command[0] == "voice":
                 irc.send("MODE {0} +v {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-            if command[0] == "devoice":
+            elif command[0] == "devoice":
                 irc.send("MODE {0} -v {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-            if command[0] == "quiet":
+            elif command[0] == "quiet":
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
                 recieve(True)
                 irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
 
-            if command[0] == "unquiet":
+            elif command[0] == "unquiet":
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
                 recieve(True)
                 irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
-                
+
     except:
         pass
+
+
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
