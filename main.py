@@ -6,6 +6,35 @@ import socket
 import ssl
 from random import *
 
+userCommands = {
+    	"*moo": "*moo | prints 'moo' [PONG]",
+	"*time": "*time | Displays system time",
+	"*echo": "*echo [+<colour>] +i|Italic +u|Underline +b|Bold [text]",
+	"*bug": "*bug <text> | reports a bug to the owner of the bot",
+	"*list admins": "*list admins | Displays a list of current admins",
+	"*calc": "*calc int/float/other */-/+/% int/float/other returns MATHS",
+        }
+adminCommands = {
+    	"*join": "*join <chan> | Makes the bot join the specified channel",
+	"*leave": "*leave <chan> | Makes the bot leave the specified channel",
+	"*quit": "*quit [Message] | makes the bot quit irc displaying the message specified or '[nick] told me to'",
+	"*r": "*r | Restarts the bot",
+	"*permissions": "*permissions <user> = <lvl> | Sets perms flags to the user specified",
+	"*kick": "*kick <user> | kicks the user from the current channel",
+	"*op": "*op <user> | ops the user on the current channel",
+	"*deop": "*deop <user> | deops the user on the current channel",
+	"*sop": "*sop | ops the bot via services",
+	"*sdeop": "*sdeop | deops the bot via services",
+	"*ban": "*ban <user> | bans the user from the current channel",
+	"*unban": "*unban <user> | unbans the user from the current channel",
+	"*kban": "*kban <user> | bans then kicks the user from the current channel",
+	"*action": "*action [text] | for third person messages | Bot moo's",
+	"*voice": "*voice <user> | voices the user in the channel",
+	"*devoice": "*devoice <user> | devoices the user in the channel",
+	"*quiet": "*quiet <user> | quiets the user in the current channel",
+	"*unquiet": "unquiet <user> | unquiets the user in the current channel",
+        }
+
 modules = {
     "last": True,
     } #Module = True/imported
@@ -102,7 +131,7 @@ def confirmsasl():
         ircmsg = " ".join(ircmsg)
         success = ":SASL authentication successful"
         failure = ":SASL authentication aborted"
-        if success in ircmsg:
+        if success in ircmsg: 
                 return True
         elif failure in ircmsg:
                 return False
@@ -217,7 +246,20 @@ while True:
     
     try:
         if command[0]:
-            if command[0] == "moo":
+            if command[0] == "list" and command[1] == "commands":
+                if nickname in stats:
+                    irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands)).encode("UTF-8"))
+
+                else:
+                    irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
+
+            elif command[0] == "help" and command[1]:
+                    try:
+                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands[command[1]]).encode("UTF-8"))
+                    except:
+                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, adminCommands[command[1]]).encode("UTF-8"))
+                 
+            elif command[0] == "moo":
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "last":
@@ -227,7 +269,7 @@ while True:
                 irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, time()).encode("UTF-8"))
 
             elif command[0] == "echo":
-                irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+                irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "").replace("+b ", "").replace("+u ", "").replace("+yellow ", "08").replace("+purple ", "06").replace("+orange ", "07").replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
 
             elif command[0] == "bug":
                 if len(command) >= 2:

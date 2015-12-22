@@ -1,0 +1,28 @@
+User commands:
+	*moo prints "moo" [PONG]
+	*time Displays system time
+	*echo [+<colour>] +i|Italic +u|Underline +b|Bold [text]
+	*bug <text> reports a bug to the owner of the bot
+	*list admins | Displays a list of current admins
+	*calc int/float/other */-/+/% int/float/other returns MATHS
+
+Admin commands:
+	*join <chan> Makes the bot join the specified channel
+	*leave <chan> Makes the bot leave the specified channel
+	*quit [Message] makes the bot quit irc displaying the message specified or '[nick] told me to'
+	*r Restarts the bot
+	*permissions <user> = <lvl> Sets perms flags to the user specified
+	*kick <user> kicks the user from the current channel
+	*op <user> ops the user on the current channel
+	*deop <user> deops the user on the current channel
+	*sop ops the bot via services
+	*sdeop deops the bot via services
+	*ban <user> bans the user from the current channel
+	*unaban <user> unbans the user from the current channel
+	*kban <user> bans then kicks the user from the current channel
+	*action [text] for third person messages | Bot moo's
+	*voice <user> voices the user in the channel
+	*devoice <user> devoices the user in the channel
+	*quiet <user> quiets the user in the current channel
+	*unquiet <user> unquiets the user in the current channel
+	
