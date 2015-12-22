@@ -246,7 +246,7 @@ while True:
     
     try:
         if command[0]:
-            if command[0] == "list" and command[1] == "commands":
+            if command[0] == "commands":
                 if nickname in stats:
                     irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands)).encode("UTF-8"))
 
@@ -255,9 +255,9 @@ while True:
 
             elif command[0] == "help" and command[1]:
                     try:
-                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands[command[1]]).encode("UTF-8"))
+                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands["*" + " ".join(command[1:])]).encode("UTF-8"))
                     except:
-                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, adminCommands[command[1]]).encode("UTF-8"))
+                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, adminCommands["*" + " ".join(command[1:])]).encode("UTF-8"))
                  
             elif command[0] == "moo":
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
