@@ -1,5 +1,6 @@
 from __future__ import print_function
 from base64 import b64encode
+from os import startfile
 from time import sleep, time
 import socket
 import ssl
@@ -9,11 +10,6 @@ modules = {
     "last": True,
     } #Module = True/imported
 
-stats = {
-    "BWBellairs[Bot]": "1",
-    "BWBellairs": "1",
-    }
-
 channelLinks = {
     }
 
@@ -22,7 +18,30 @@ bans = {
 
 startup = False
 
+stats = {
+    }
+def perms(write = False):
+    global stats
+
+    if write == False:
+        with open("ops.txt", "r+") as perms1:
+            for i in perms1.read().replace(" ", "").split():
+                stats[i] = "1"
+            perms1.close()
+
+    elif write == True:
+        with open("ops.txt", "w") as perms2:
+            for i in stats:
+                perms2.write(i + "\n")
+            perms2.close()
+
+perms()
+
 def connectAndIdentify():
+
+    with open("password.txt", "r+") as passwordFile:
+        password = passwordFile.readline()
+        passwordFile.close()
 
     server = "chat.freenode.net"
     port = 6697
@@ -32,7 +51,6 @@ def connectAndIdentify():
     ident = "BWBellairs[Bot]"
     use_ssl = True
     use_sasl = True
-    password = raw_input("Enter password")
     username = "BWBellairs[Bot]"
     command = "$None$"
     nickname = "BWBellairs[Bot]"
@@ -220,6 +238,11 @@ while True:
                 else:
                     irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
+            elif command[0] == "list" and command[1] == "admins":
+                txtToSend = " ".join(stats)
+                txtToSend = txtToSend[:len(txtToSend) -1] + "r" + txtToSend[len(txtToSend):]
+                irc.send("PRIVMSG {0} :{1}, Bot admins are: {2}r\n".format(chan, nickname, txtToSend).replace("1", "").encode("UTF-8"))
+
             elif command[0] == "calc":
                 try:
 
@@ -256,20 +279,29 @@ while True:
                 irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
 
             elif command[0] == "quit":
+                perms(True)
+
                 if len(command) > 1:
-                    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
 
                 else:
-                    irc.send("NOTICE ##BWBellairs :BWBellairs[Bot] is now unactive, goodbye...\r\n".encode("UTF-8"))
                     irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
 
+                quit()
+            
+            elif command[0] == "r":
+                perms(True)
+                irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
+                startfile("main.py")
+                quit()
                 
-                    
             elif command[0] == "permissions" and command[2] == "=":
                 try:
                     if command[3] == "1" or command[3] == "0":
-                        stats[command[1]] = command[3]
+                        if command[3] == "0":
+                            del stats[command[1]]
+                        elif command[3] == "1":
+                            stats[command[1]] = command[3]
                         irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
                     else:
                         irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
