@@ -239,9 +239,7 @@ while True:
                     irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "list" and command[1] == "admins":
-                txtToSend = " ".join(stats)
-                txtToSend = txtToSend[:len(txtToSend) -1] + "r" + txtToSend[len(txtToSend):]
-                irc.send("PRIVMSG {0} :{1}, Bot admins are: {2}r\n".format(chan, nickname, txtToSend).replace("1", "").encode("UTF-8"))
+                irc.send("PRIVMSG {0} :{1}, Bot admins are: {2}\r\n".format(chan, nickname, " ".join(stats)).encode("UTF-8"))
 
             elif command[0] == "calc":
                 try:
@@ -306,7 +304,7 @@ while True:
                     else:
                         irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
                 except:
-                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1/\r\n".format(chan, nickname).encode("UTF-8"))
+                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "kick":
                 if command[1]:
