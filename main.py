@@ -130,11 +130,14 @@ def confirmsasl():
         print(ircmsg)
         ircmsg = " ".join(ircmsg)
         success = ":SASL authentication successful"
-        failure = ":SASL authentication aborted"
+        failure = ":SASL authentication failed"
+        aborted = ":SASL authentication aborted"
         if success in ircmsg: 
                 return True
         elif failure in ircmsg:
                 return False
+        elif aborted in ircmsg:
+        	return False
 
 def recieve(commandNone = False):
 
