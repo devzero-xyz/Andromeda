@@ -6,34 +6,49 @@ import socket
 import ssl
 from random import *
 
-userCommands = {
-    	"*moo": "*moo | prints 'moo' [PONG]",
-	"*time": "*time | Displays system time",
-	"*echo": "*echo [+<colour>] +i|Italic +u|Underline +b|Bold [text]",
-	"*bug": "*bug <text> | reports a bug to the owner of the bot",
-	"*list admins": "*list admins | Displays a list of current admins",
-	"*calc": "*calc int/float/other */-/+/% int/float/other returns MATHS",
+commandCharacter = "*"
+botnick = "BWBellairs[Bot]"
+
+def setupCommands():
+    global userCommands, adminCommands, ownerCommands
+
+    userCommands = {
+            "perm level": "*perm level | Displays the users permissions level",
+            botnick + " char": botnick + " char | returns the current command character",
+            "moo": commandCharacter + "moo | prints 'moo' [PONG]",
+            "time": commandCharacter + "time | Displays system time",
+            "echo": commandCharacter + "echo [+<colour>] +i|Italic +u|Underline +b|Bold [text]",
+            "bug": commandCharacter + "bug <text> | reports a bug to the owner of the bot",
+            "list admins": commandCharacter + "list admins | Displays a list of current admins",
+            "calc": commandCharacter + "calc int/float/other */-/+/% int/float/other returns MATHS",
+            "list channels": commandCharacter + "lists channels | List the channels the bot is in",
+            }
+    adminCommands = {
+            "join": commandCharacter + "join <chan> | Makes the bot join the specified channel",
+            "leave": commandCharacter + "leave <chan> | Makes the bot leave the specified channel",
+            "permissions": commandCharacter + "permissions <user> = <lvl> | Sets perms flags to the user specified",
+            "kick": commandCharacter + "kick <user> | kicks the user from the current channel",
+            "op": commandCharacter + "op <user> | ops the user on the current channel",
+            "deop": commandCharacter + "deop <user> | deops the user on the current channel",
+            "sop": commandCharacter + "sop | ops the bot via services",
+            "sdeop": commandCharacter + "sdeop | deops the bot via services",
+            "ban": commandCharacter + "ban <user> | bans the user from the current channel",
+            "unban": commandCharacter + "unban <user> | unbans the user from the current channel",
+            "kban": commandCharacter + "kban <user> | bans then kicks the user from the current channel",
+            "action": commandCharacter + "action [text] | for third person messages | Bot moo's",
+            "voice": commandCharacter + "voice <user> | voices the user in the channel",
+            "devoice": commandCharacter + "devoice <user> | devoices the user in the channel",
+            "quiet": commandCharacter + "quiet <user> | quiets the user in the current channel",
+            "unquiet": commandCharacter + "unquiet <user> | unquiets the user in the current channel",
+            }
+
+    ownerCommands = {
+        "r": commandCharacter + "r | Restarts the bot",
+        "quit": commandCharacter + "quit [Message] | makes the bot quit irc displaying the message specified or '[nick] told me to'",
+        "commandChar": commandCharacter + "changes the bot's command character",
         }
-adminCommands = {
-    	"*join": "*join <chan> | Makes the bot join the specified channel",
-	"*leave": "*leave <chan> | Makes the bot leave the specified channel",
-	"*quit": "*quit [Message] | makes the bot quit irc displaying the message specified or '[nick] told me to'",
-	"*r": "*r | Restarts the bot",
-	"*permissions": "*permissions <user> = <lvl> | Sets perms flags to the user specified",
-	"*kick": "*kick <user> | kicks the user from the current channel",
-	"*op": "*op <user> | ops the user on the current channel",
-	"*deop": "*deop <user> | deops the user on the current channel",
-	"*sop": "*sop | ops the bot via services",
-	"*sdeop": "*sdeop | deops the bot via services",
-	"*ban": "*ban <user> | bans the user from the current channel",
-	"*unban": "*unban <user> | unbans the user from the current channel",
-	"*kban": "*kban <user> | bans then kicks the user from the current channel",
-	"*action": "*action [text] | for third person messages | Bot moo's",
-	"*voice": "*voice <user> | voices the user in the channel",
-	"*devoice": "*devoice <user> | devoices the user in the channel",
-	"*quiet": "*quiet <user> | quiets the user in the current channel",
-	"*unquiet": "unquiet <user> | unquiets the user in the current channel",
-        }
+    
+setupCommands()
 
 modules = {
     "last": True,
@@ -53,20 +68,34 @@ def perms(write = False):
     global stats
 
     if write == False:
-        with open("ops.txt", "r+") as perms1:
+        with open("admins.txt", "r+") as perms1:
             for i in perms1.read().replace(" ", "").split():
                 stats[i] = "1"
             perms1.close()
 
-    elif write == True:
-        with open("ops.txt", "w") as perms2:
+        with open("owners.txt", "r+") as perms1:
+            for i in perms1.read().replace(" ", "").split():
+                stats[i] = "2"
+            perms1.close()
+
+    if write == True:
+        with open("admins.txt", "w") as perms2:
             for i in stats:
                 perms2.write(i + "\n")
             perms2.close()
 
+    if write == True:
+        with open("owners.txt", "w") as perms2:
+            for i in stats:
+                if stats[i] == "2":
+                    perms2.write(i + "\n")
+            perms2.close()
+
 perms()
 
-def connectAndIdentify():
+def connectAndIdentify(botnick = botnick):
+
+    global irc, channels
 
     with open("password.txt", "r+") as passwordFile:
         password = passwordFile.readline()
@@ -74,7 +103,7 @@ def connectAndIdentify():
 
     server = "chat.freenode.net"
     port = 6697
-    channels = ["##BWBellairs", "##powder-bots", "#botters-test"]
+    channels = ["##BWBellairs", "##powder-bots", "#botters-test", "##BWBellairs-bots", "#U_U"]
     botnick = "BWBellairs[Bot]"
     realname = "BWBellairs[Bot]"
     ident = "BWBellairs[Bot]"
@@ -82,9 +111,6 @@ def connectAndIdentify():
     use_sasl = True
     username = "BWBellairs[Bot]"
     command = "$None$"
-    nickname = "BWBellairs[Bot]"
-
-    global irc
 
     irc = None
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # defines the socket
@@ -174,9 +200,9 @@ def recieve(commandNone = False):
 
             message = t[3:]
 
-        if message and message[0].startswith("*"):
+        if message and message[0].startswith(commandCharacter):
             command = " ".join(message).split()
-            command[0] = command[0].replace("*", "")
+            command[0] = command[0].replace(commandCharacter, "")
             print("cmd", command)
     
 def ircSend(typeM, chan = None, nickname = None, *args):
@@ -211,9 +237,9 @@ def channelLink(cmd = None, channelA = None, channelB = None):
     else:
         for i in channelLinks:
             if i == chan:
-                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(channelLinks[i], i, nickname, " ".join(message)).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :[{1}] {2}: {3}\r\n".format(channelLinks[i], i, nickname, " ".join(message)).encode("UTF-8"))
             elif channelLinks[i] == chan:
-                irc.send("PRIVMSG {0} :[{1}] {2}, {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :[{1}] {2}: {3}\r\n".format(i, channelLinks[i], nickname, " ".join(message)).encode("UTF-8"))
 
 def last(nickname = None, cmd = False):
     nicks = {}
@@ -244,24 +270,50 @@ while True:
     channelLink()
     last(None, "refresh")
 
-    if t[1] == "KICK" and t[3] == "BWBellairs[Bot]":
-        irc.send("JOIN {0}\r\n".format(t[2]).encode("UTF-8"))
+    try:
+        if t[3] == botnick + "," and t[4] == "char" or t[3] == botnick + ":" and t[4] == "char":
+            irc.send("PRIVMSG {0} :{1}, My current command character is: {2}\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))            
+    
+        if t[1] == "KICK" and t[3] == "BWBellairs[Bot]":
+            irc.send("JOIN {0}\r\n".format(t[2]).encode("UTF-8"))
+    except:
+        pass
     
     try:
         if command[0]:
+
             if command[0] == "commands":
-                if nickname in stats:
+                if stats[nickname] == "1":
                     irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands)).encode("UTF-8"))
+
+                elif stats[nickname] == "2":
+                    irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3} {4}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands), ", ".join(ownerCommands)).encode("UTF-8"))
 
                 else:
                     irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
 
-            elif command[0] == "help" and command[1]:
-                    try:
-                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands["*" + " ".join(command[1:])]).encode("UTF-8"))
-                    except:
-                        irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, adminCommands["*" + " ".join(command[1:])]).encode("UTF-8"))
-                 
+            elif command[0] == "perm" and  command[1] == "level":
+                if nickname in stats:
+                    irc.send("PRIVMSG {0} :{1} your permissions lvl is: {2}\r\n".format(chan, nickname, stats[nickname]).encode("UTF-8"))
+
+                else:
+                    irc.send("PRIVMSG {0} :{1} your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
+
+            elif command[0] == "list" and command[1] == "channels":
+                irc.send("PRIVMSG {0} :Channel(s) I'm in: {1}\r\n".format(nickname, ", ".join(channels)).encode("UTF-8"))
+
+            elif command[0] == "help":
+                if len(command) == 1:
+                    irc.send("PRIVMSG {0} :{1}, try {2}commands for a command listing\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))
+
+                elif command[1] in userCommands:
+                    irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands[" ".join(command[1:])]).encode("UTF-8"))
+                elif command[1] in adminCommands:
+                    irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, adminCommands[" ".join(command[1:])]).encode("UTF-8"))
+                elif command[1] in ownerCommands:
+                    irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, ownerCommands[" ".join(command[1:])]).encode("UTF-8"))
+
+                    
             elif command[0] == "moo":
                 irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
@@ -284,7 +336,7 @@ while True:
                     irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "list" and command[1] == "admins":
-                irc.send("PRIVMSG {0} :{1}, Bot admins are: {2}\r\n".format(chan, nickname, " ".join(stats)).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :Bot admins are: {1}\r\n".format(nickname, " ".join(stats)).encode("UTF-8"))
 
             elif command[0] == "calc":
                 try:
@@ -314,42 +366,24 @@ while True:
                 except:
                     irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
             
-        if stats[nickname] == "1":
-            if command[0] == "join":
+        if stats[nickname] == "1" or stats[nickname] == "2":
+            if command[0] == "join" and command[1]:
                 irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
+                channels.append(command[1])
 
-            elif command[0] == "leave":
-                irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
-
-            elif command[0] == "quit":
-                perms(True)
-
-                if len(command) > 1:
-                    irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
-
+            elif command[0] == "commandChar" and command[1]:
+                if commandCharacter == command[1]:
+                    irc.send("PRIVMSG {0} :{1}, That command character is already in use!\r\n".format(i, nickname).encode("UTF-8"))
                 else:
-                    irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
+                    commandCharacter = command[1]
+                    setupCommands()
+                    for i in channels:
+                        irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(i, commandCharacter).encode("UTF-8"))
 
-                quit()
-            
-            elif command[0] == "r":
-                perms(True)
-                irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
-                startfile("main.py")
-                quit()
                 
-            elif command[0] == "permissions" and command[2] == "=":
-                try:
-                    if command[3] == "1" or command[3] == "0":
-                        if command[3] == "0":
-                            del stats[command[1]]
-                        elif command[3] == "1":
-                            stats[command[1]] = command[3]
-                        irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
-                    else:
-                        irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
-                except:
-                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
+            elif command[0] == "leave" and command[1]:
+                irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
+                channels.remove(command[1])
 
             elif command[0] == "kick":
                 if command[1]:
@@ -359,18 +393,32 @@ while True:
                     irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8"))
 
             elif command[0] == "op":
-                if command[1]:
+                if len(command) == 1:
+                    irc.send("MODE {0} +o {1}\r\n".format(chan, nickname).encode("UTF-8"))
+
+                else:
                     irc.send("MODE {0} +o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
             elif command[0] == "deop":
-                if command[1]:
-                    irc.send("MODE {0} -o {1} :\r\n".format(chan, command[1] or nickname).encode("UTF-8"))
+                if len(command) == 1:
+                    irc.send("MODE {0} -o {1}\r\n".format(chan, nickname).encode("UTF-8"))
+
+                else:
+                    irc.send("MODE {0} -o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
             elif command[0] == "sop":
-                irc.send("PRIVMSG ChanServ :OP {0}\r\n".format(chan).encode("UTF-8"))
+                if len(command) == 1:
+                    irc.send("PRIVMSG ChanServ :OP {0}\r\n".format(chan).encode("UTF-8"))
+
+                else:
+                    irc.send("PRIVMSG ChanServ :OP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
             elif command[0] == "sdeop":
-                irc.send("PRIVMSG ChanServ :DEOP {0}\r\n".format(chan).encode("UTF-8"))
+                if len(command) == 1:
+                    irc.send("PRIVMSG ChanServ :DEOP {0}\r\n".format(chan).encode("UTF-8"))
+
+                else:
+                    irc.send("PRIVMSG ChanServ :DEOP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
             elif command[0] == "ban":
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
@@ -413,6 +461,36 @@ while True:
                 irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
                 recieve(True)
                 irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+
+        if stats[nickname] == "2":
+            if command[0] == "quit":
+                perms(True)
+                if len(command) > 1:
+                    irc.send("QUIT :{0}\r\n".format(" ".join(command[1:])).encode("UTF-8"))
+
+                else:
+                    irc.send("QUIT :{0}\r\n".format(nickname + " told me to").encode("UTF-8"))
+
+                quit()
+            
+            elif command[0] == "r":
+                perms(True)
+                irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
+                startfile("main.py")
+                quit()
+                
+            elif command[0] == "permissions" and command[2] == "=":
+                try:
+                    if command[3] == "1" or command[3] == "0" or command[3] == "2":
+                        if command[3] == "0":
+                            del stats[command[1]]
+                        elif command[3] == "1" or command[3] == "2":
+                            stats[command[1]] = command[3]
+                        irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
+                    else:
+                        irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
+                except:
+                    irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
 
     except:
         pass
