@@ -1,20 +1,24 @@
 from __future__ import print_function
 from base64 import b64encode
-from os import startfile
 from time import sleep, time
 import socket
 import ssl
 from random import *
 
+startTime = time()
+messagesSeen = 0
 commandCharacter = "*"
 botnick = "BWBellairs[Bot]"
 
-def setupCommands():
-    global userCommands, adminCommands, ownerCommands
+def setupCommands(char = commandCharacter):
+    global userCommands, adminCommands, ownerCommands, commandCharacter
+
+    commandCharacter = char
 
     userCommands = {
-            "perm level": "*perm level | Displays the users permissions level",
-            botnick + " char": botnick + " char | returns the current command character",
+            "status": commandCharacter + "status | Displays infomation :P",
+            "perm level": commandCharacter + "perm level | Displays the users permissions level",
+            botnick + " char": botnick + ", char | returns the current command character",
             "moo": commandCharacter + "moo | prints 'moo' [PONG]",
             "time": commandCharacter + "time | Displays system time",
             "echo": commandCharacter + "echo [+<colour>] +i|Italic +u|Underline +b|Bold [text]",
@@ -45,8 +49,10 @@ def setupCommands():
     ownerCommands = {
         "r": commandCharacter + "r | Restarts the bot",
         "quit": commandCharacter + "quit [Message] | makes the bot quit irc displaying the message specified or '[nick] told me to'",
-        "commandChar": commandCharacter + "changes the bot's command character",
+        "commandChar": commandCharacter + "commandChar | changes the bot's command character",
         }
+
+    return
     
 setupCommands()
 
@@ -156,14 +162,11 @@ def confirmsasl():
         print(ircmsg)
         ircmsg = " ".join(ircmsg)
         success = ":SASL authentication successful"
-        failure = ":SASL authentication failed"
-        aborted = ":SASL authentication aborted"
+        failure = ":SASL authentication aborted"
         if success in ircmsg: 
                 return True
         elif failure in ircmsg:
                 return False
-        elif aborted in ircmsg:
-        	return False
 
 def recieve(commandNone = False):
 
@@ -289,8 +292,12 @@ while True:
                 elif stats[nickname] == "2":
                     irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3} {4}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands), ", ".join(ownerCommands)).encode("UTF-8"))
 
-                else:
+                elif nickname not in stats:
                     irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
+
+            elif command[0] == "status":
+                irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
+                
 
             elif command[0] == "perm" and  command[1] == "level":
                 if nickname in stats:
@@ -369,21 +376,18 @@ while True:
         if stats[nickname] == "1" or stats[nickname] == "2":
             if command[0] == "join" and command[1]:
                 irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
-                channels.append(command[1])
+                channels = channels.append(command[1])
 
-            elif command[0] == "commandChar" and command[1]:
+            elif command[0] == "commandChar":
                 if commandCharacter == command[1]:
-                    irc.send("PRIVMSG {0} :{1}, That command character is already in use!\r\n".format(i, nickname).encode("UTF-8"))
+                    irc.send("PRIVMSG {0} :{1}, That command character is already in use!\r\n".format(chan, nickname).encode("UTF-8"))
                 else:
-                    commandCharacter = command[1]
-                    setupCommands()
-                    for i in channels:
-                        irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(i, commandCharacter).encode("UTF-8"))
-
+                    irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(", ".join(channels), commandCharacter).encode("UTF-8"))
+                    setupCommands(command[1])
                 
             elif command[0] == "leave" and command[1]:
                 irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
-                channels.remove(command[1])
+                channels = channels.remove(command[1])
 
             elif command[0] == "kick":
                 if command[1]:
@@ -495,6 +499,7 @@ while True:
     except:
         pass
 
+    messagesSeen += 1
 
 #=========================================================================================#
 #=========================================================================================#
