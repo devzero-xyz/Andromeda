@@ -293,8 +293,8 @@ while True:
             elif stats[nickname] == "2":
                 irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3} {4}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands), ", ".join(ownerCommands)).encode("UTF-8"))
                 
-            elif nickname not in stats:
-                    irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
+            else:
+                irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
 
         elif command[0] == "status":
             irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
