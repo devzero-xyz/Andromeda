@@ -376,7 +376,7 @@ while True:
     if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
         if command[0] == "join" and command[1]:
             irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
-            channels = channels.append(command[1])
+            channels.append(command[1])
             
         elif command[0] == "commandChar":
             if commandCharacter == command[1]:
@@ -387,7 +387,7 @@ while True:
                 
         elif command[0] == "leave" and command[1]:
             irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
-            channels = channels.remove(command[1])
+            channels.remove(command[1])
 
         elif command[0] == "kick":
             if command[1]:
