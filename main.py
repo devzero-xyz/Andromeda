@@ -294,6 +294,7 @@ while True:
                 if command[1] not in ["0", "1", "2"]:
                     irc.send("PRIVMSG {0} :{1}, That permission lvl doesn't exist [1-2]\r\n".format(chan, nickname).encode("UTF-8"))
                 
+<<<<<<< HEAD
                 elif int(command[1]) == 0:
                     irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "04" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
 
@@ -317,6 +318,10 @@ while True:
                     textToAdd = textToAdd + "04"
                 textToAdd = textToAdd + ", " + ", ".join(ownerCommands)
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
+=======
+            else:
+                irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
+>>>>>>> origin/master
 
         elif command[0] == "status":
             irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
@@ -398,7 +403,7 @@ while True:
     if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
         if command[0] == "join" and command[1]:
             irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
-            channels = channels.append(command[1])
+            channels.append(command[1])
             
         elif command[0] == "commandChar":
             if commandCharacter == command[1]:
@@ -409,7 +414,7 @@ while True:
                 
         elif command[0] == "leave" and command[1]:
             irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
-            channels = channels.remove(command[1])
+            channels.remove(command[1])
 
         elif command[0] == "kick":
             if command[1]:
