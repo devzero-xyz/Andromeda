@@ -294,7 +294,6 @@ while True:
                 if command[1] not in ["0", "1", "2"]:
                     irc.send("PRIVMSG {0} :{1}, That permission lvl doesn't exist [1-2]\r\n".format(chan, nickname).encode("UTF-8"))
                 
-<<<<<<< HEAD
                 elif int(command[1]) == 0:
                     irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "04" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
 
@@ -318,10 +317,6 @@ while True:
                     textToAdd = textToAdd + "04"
                 textToAdd = textToAdd + ", " + ", ".join(ownerCommands)
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
-=======
-            else:
-                irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
->>>>>>> origin/master
 
         elif command[0] == "status":
             irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
@@ -405,66 +400,66 @@ while True:
             irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
             channels.append(command[1])
             
-        elif command[0] == "commandChar":
+        elif command[0] == "commandChar"  and len(command) >= 2:
             if commandCharacter == command[1]:
                 irc.send("PRIVMSG {0} :{1}, That command character is already in use!\r\n".format(chan, nickname).encode("UTF-8"))
             else:
                 irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(chan, command[1]).encode("UTF-8"))
                 setupCommands(command[1])
                 
-        elif command[0] == "leave" and command[1]:
+        elif command[0] == "leave" and len(command) >= 2:
             irc.send("PART {0}\r\n".format(command[1]).encode("UTF-8"))
             channels.remove(command[1])
 
-        elif command[0] == "kick":
+        elif command[0] == "kick" and len(command) >= 2:
             if command[1]:
                 irc.send("KICK {0} {1} :{2}\r\n".format(chan, command[1], " ".join(command[2:]) or command[1]).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8"))
 
-        elif command[0] == "op":
+        elif command[0] == "op" and len(command) >= 2:
             if len(command) == 1:
                 irc.send("MODE {0} +o {1}\r\n".format(chan, nickname).encode("UTF-8"))
 
             else:
                 irc.send("MODE {0} +o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "deop":
+        elif command[0] == "deop" and len(command) >= 2:
             if len(command) == 1:
                 irc.send("MODE {0} -o {1}\r\n".format(chan, nickname).encode("UTF-8"))
 
             else:
                 irc.send("MODE {0} -o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "sop":
+        elif command[0] == "sop" and len(command) >= 2:
             if len(command) == 1:
                 irc.send("PRIVMSG ChanServ :OP {0}\r\n".format(chan).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG ChanServ :OP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "sdeop":
+        elif command[0] == "sdeop" and len(command) >= 2:
             if len(command) == 1:
                 irc.send("PRIVMSG ChanServ :DEOP {0}\r\n".format(chan).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG ChanServ :DEOP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "ban":
+        elif command[0] == "ban and len(command) >= 2":
             irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
             recieve(True)
             irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
             bans[command[1]] = t[5]
 
-        elif command[0] == "unban":
+        elif command[0] == "unban" and len(command) >= 2:
             try:
                 irc.send("MODE {0} -b {1}\r\n".format(chan, bans[command[1]]).encode("UTF-8"))
                 del bans[command[1]]
             except:
                 pass
 
-        elif command[0] == "kban":
+        elif command[0] == "kban" and len(command) >= 2:
             irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
             recieve(True)
             irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
@@ -534,4 +529,5 @@ while True:
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
+
 
