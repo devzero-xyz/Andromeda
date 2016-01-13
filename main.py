@@ -5,6 +5,7 @@ import socket
 import ssl
 from random import *
 import os
+import sys
 
 startTime = time()
 messagesSeen = 0
@@ -27,12 +28,12 @@ def setupCommands(char = commandCharacter):
             "bug": commandCharacter + "bug <text> | reports a bug to the owner of the bot",
             "list admins": commandCharacter + "list admins | Displays a list of current admins",
             "calc": commandCharacter + "calc int/float/other */-/+/% int/float/other returns MATHS",
-            "list channels": commandCharacter + "lists channels | List the channels the bot is in",
+            "list channels": commandCharacter + "list channels | List the channels the bot is in",
+            "list": commandCharacter + "list | Lists the commands it has :P",
             }
     adminCommands = {
             "join": commandCharacter + "join <chan> | Makes the bot join the specified channel",
             "leave": commandCharacter + "leave <chan> | Makes the bot leave the specified channel",
-            "permissions": commandCharacter + "permissions <user> = <lvl> | Sets perms flags to the user specified",
             "kick": commandCharacter + "kick <user> | kicks the user from the current channel",
             "op": commandCharacter + "op <user> | ops the user on the current channel",
             "deop": commandCharacter + "deop <user> | deops the user on the current channel",
@@ -52,6 +53,7 @@ def setupCommands(char = commandCharacter):
         "r": commandCharacter + "r | Restarts the bot",
         "quit": commandCharacter + "quit [Message] | makes the bot quit irc displaying the message specified or '[nick] told me to'",
         "commandChar": commandCharacter + "commandChar | changes the bot's command character",
+        "permissions": commandCharacter + "permissions <user> = <lvl> | Sets perms flags to the user specified",
         }
 
     return
@@ -77,26 +79,26 @@ def perms(write = False):
 
     if write == False:
         with open("admins.txt", "r+") as perms1:
-            for i in perms1.read().replace(" ", "").split():
+            for i in perms1.read().split():
                 stats[i] = "1"
             perms1.close()
 
         with open("owners.txt", "r+") as perms1:
-            for i in perms1.read().replace(" ", "").split():
+            for i in perms1.read().split():
                 stats[i] = "2"
             perms1.close()
 
     if write == True:
         with open("admins.txt", "w") as perms2:
             for i in stats:
-                perms2.write(i + "\n")
+                perms2.write(i + " ")
             perms2.close()
 
     if write == True:
         with open("owners.txt", "w") as perms2:
             for i in stats:
                 if stats[i] == "2":
-                    perms2.write(i + "\n")
+                    perms2.write(i + " ")
             perms2.close()
 
 perms()
@@ -286,33 +288,53 @@ while True:
     
 
     if len(command) >= 1:
-        if command[0] == "commands":
-            if stats[nickname] == "1":
-                irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands)).encode("UTF-8"))
-
-            elif stats[nickname] == "2":
-                irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2} {3} {4}\r\n".format(chan, nickname, ", ".join(userCommands), ", ".join(adminCommands), ", ".join(ownerCommands)).encode("UTF-8"))
+        if command[0] == "list" and len(command) == 1:
+            if len(command) >= 2 and command[1] in ["-0", "-1", "-2"] or len(command) >= 2:
+                command[1] = command[1].replace("-","")
+                if command[1] not in ["0", "1", "2"]:
+                    irc.send("PRIVMSG {0} :{1}, That permission lvl doesn't exist [1-2]\r\n".format(chan, nickname).encode("UTF-8"))
                 
-            elif nickname not in stats:
-                    irc.send("PRIVMSG {0} :{1}, Commands available for you are: {2}\r\n".format(chan, nickname, ", ".join(userCommands)).encode("UTF-8"))
+                elif int(command[1]) == 0:
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "04" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
+
+                elif int(command[1]) == 1:
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "03" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
+                    
+                elif int(command[1]) == 2:
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "03" + ", ".join(adminCommands) + ",", "03" + ", ".join(ownerCommands)).encode("UTF-8"))
+
+            else:
+                textToAdd = "03" + ", ".join(userCommands)  + ", " 
+                if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
+                    textToAdd = textToAdd + "03"
+                else:
+                    textToAdd = textToAdd + "04"
+                textToAdd = textToAdd + ", ".join(adminCommands)
+
+                if nickname in stats and stats[nickname] == "2":
+                    textToAdd = textToAdd + "03"
+                else:
+                    textToAdd = textToAdd + "04"
+                textToAdd = textToAdd + ", " + ", ".join(ownerCommands)
+                irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
 
         elif command[0] == "status":
             irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
                 
 
-        elif command[0] == "perm" and  command[1] == "level":
+        elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
             if nickname in stats:
                 irc.send("PRIVMSG {0} :{1} your permissions lvl is: {2}\r\n".format(chan, nickname, stats[nickname]).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG {0} :{1} your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
 
-        elif command[0] == "list" and command[1] == "channels":
+        elif len(command) >= 2 and command[0] == "list" and command[1] == "channels":
             irc.send("PRIVMSG {0} :Channel(s) I'm in: {1}\r\n".format(nickname, ", ".join(channels)).encode("UTF-8"))
 
         elif command[0] == "help":
             if len(command) == 1:
-                irc.send("PRIVMSG {0} :{1}, try {2}commands for a command listing\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :{1}, try {2}list for a command listing\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))
 
             elif command[1] in userCommands:
                 irc.send("PRIVMSG {0} :{1}, Help on this command: {2}\r\n".format(chan, nickname, userCommands[" ".join(command[1:])]).encode("UTF-8"))
@@ -323,7 +345,7 @@ while True:
 
                     
         elif command[0] == "moo":
-            irc.send("PRIVMSG {0} :{1}, Mooooo!\r\n".format(chan, nickname).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :{1}, Mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo!\r\n".format(chan, nickname).encode("UTF-8"))
 
         elif command[0] == "last":
             last(nickname, command[1])
@@ -332,7 +354,7 @@ while True:
             irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, time()).encode("UTF-8"))
 
         elif command[0] == "echo":
-            irc.send("PRIVMSG {0} :\017{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "").replace("+b ", "").replace("+u ", "").replace("+yellow ", "08").replace("+purple ", "06").replace("+orange ", "07").replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+            irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "").replace("+b ", "").replace("+u ", "").replace("+yellow ", "08").replace("+purple ", "06").replace("+orange ", "07").replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
 
         elif command[0] == "bug":
             if len(command) >= 2:
@@ -343,7 +365,7 @@ while True:
             else:
                 irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
-        elif command[0] == "list" and command[1] == "admins":
+        elif len(command) >= 2 and command[0] == "list" and command[1] == "admins":
             irc.send("PRIVMSG {0} :Bot admins are: {1}\r\n".format(nickname, " ".join(stats)).encode("UTF-8"))
 
         elif command[0] == "calc":
@@ -382,7 +404,7 @@ while True:
             if commandCharacter == command[1]:
                 irc.send("PRIVMSG {0} :{1}, That command character is already in use!\r\n".format(chan, nickname).encode("UTF-8"))
             else:
-                irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(", ".join(channels), commandCharacter).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :My command character has been changed to: {1}\r\n".format(chan, command[1]).encode("UTF-8"))
                 setupCommands(command[1])
                 
         elif command[0] == "leave" and command[1]:
@@ -447,21 +469,21 @@ while True:
         elif command[0] == "channel" and command[1] == "links":
             channelLink(command[2], command[3], command[4])
 
-        elif command[0] == "action":
+        elif command[0] == "action" and len(command) >= 2:
                 irc.send("PRIVMSG {0} :\x01ACTION {1}\x01\r\n".format(chan, " ".join(command[1:])).encode("UTF-8"))
 
-        elif command[0] == "voice":
+        elif command[0] == "voice" and len(command) >= 2:
             irc.send("MODE {0} +v {1}\r\n".format(chan, command[1]).encode("UTF-8"))
             
-        elif command[0] == "devoice":
+        elif command[0] == "devoice" and len(command) >= 2:
             irc.send("MODE {0} -v {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "quiet":
+        elif command[0] == "quiet" and len(command) >= 2:
             irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
             recieve(True)
             irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
 
-        elif command[0] == "unquiet":
+        elif command[0] == "unquiet" and len(command) >= 2:
             irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
             recieve(True)
             irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
@@ -480,13 +502,17 @@ while True:
         elif command[0] == "r":
             perms(True)
             irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
-            os.execl("/home/bwbellairs/BWBellairs[Bot]", "main.py")
+            execfile("main.py")
                 
-        elif command[0] == "permissions" and command[2] == "=":
+        elif len(command) >= 2 and command[0] == "permissions" and command[2] == "=":
             try:
                 if command[3] == "1" or command[3] == "0" or command[3] == "2":
                     if command[3] == "0":
-                        del stats[command[1]]
+                        try:
+                            del stats[command[1]]
+                            irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to 0\r\n".format(chan, nickname, command[1]).encode("UTF-8"))
+                        except:
+                            pass
                     elif command[3] == "1" or command[3] == "2":
                         stats[command[1]] = command[3]
                         irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
