@@ -1,6 +1,9 @@
+#!/usr/bin/python3
+
 from __future__ import print_function
 from base64 import b64encode
 from time import sleep, time
+from fnmatch import fnmatch
 import socket
 import ssl
 from random import *
@@ -72,36 +75,56 @@ bans = {
 
 startup = False
 
-stats = {
-    }
+owners = []
+
+admins = []
+
 def perms(write = False):
-    global stats
+    global owners, admins
 
     if write == False:
         with open("admins.txt", "r+") as perms1:
-            for i in perms1.read().split():
-                stats[i] = "1"
+            perms11 = perms1.read()
+            perms11 = perms11.strip(" \n")
+            admins = perms11.split("\n")
             perms1.close()
 
         with open("owners.txt", "r+") as perms1:
-            for i in perms1.read().split():
-                stats[i] = "2"
+            perms11 = perms1.read()
+            perms11 = perms11.strip(" \n")
+            owners = perms11.split("\n")
             perms1.close()
 
     if write == True:
         with open("admins.txt", "w") as perms2:
-            for i in stats:
-                perms2.write(i + " ")
+            for i in admins:
+                perms2.write(i + "\n")
             perms2.close()
 
     if write == True:
         with open("owners.txt", "w") as perms2:
-            for i in stats:
-                if stats[i] == "2":
-                    perms2.write(i + " ")
+            for i in owners:
+                perms2.write(i + "\n")
             perms2.close()
 
 perms()
+
+def isOwner(mask):
+    for i in owners:
+        isowner = fnmatch(mask, i)
+        if isowner:
+            return True
+    return False
+
+def isAdmin(mask):
+    isowner = isOwner(mask)
+    if isowner:
+        return True
+    for i in admins:
+        isadmin = fnmatch(mask, i)
+        if isadmin:
+            return True
+    return False
 
 def connectAndIdentify(botnick = botnick):
 
@@ -109,6 +132,7 @@ def connectAndIdentify(botnick = botnick):
 
     with open("password.txt", "r+") as passwordFile:
         password = passwordFile.readline()
+        password = password.strip(" \n")
         passwordFile.close()
 
     server = "chat.freenode.net"
@@ -123,7 +147,7 @@ def connectAndIdentify(botnick = botnick):
     command = "$None$"
 
     irc = None
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # defines the socket
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)  # defines the socket
     if use_ssl:
         irc = ssl.wrap_socket(sock)
     else:
@@ -134,8 +158,9 @@ def connectAndIdentify(botnick = botnick):
 
     if use_sasl:
         saslstring = b64encode("{0}\x00{0}\x00{1}".format(
-                	username, password).encode("UTF-8")) 
-        irc.send("CAP REQ :sasl\r\n".format("UTF-8"))
+                        username, password).encode("UTF-8"))
+        saslstring = saslstring.decode("UTF-8")
+        irc.send("CAP REQ :sasl\r\n".encode("UTF-8"))
         irc.send("USER {0} {1} blah :{2}\r\n".format(
                 ident, botnick, realname).encode("UTF-8"))
         irc.send("NICK {0}\r\n".format(botnick).encode("UTF-8"))
@@ -147,7 +172,7 @@ def connectAndIdentify(botnick = botnick):
             irc.send("CAP END\r\n".encode("UTF-8"))
         else:
             print("SASL aborted. exiting.")
-            irc.send("QUIT\r\n")
+            irc.send("QUIT\r\n".encode("UTF-8"))
             irc.shutdown(2)
             exit()
     else:
@@ -162,31 +187,34 @@ def connectAndIdentify(botnick = botnick):
 def confirmsasl():
     while True:
         ircmsg = irc.recv(2048)
+        ircmsg = ircmsg.decode("UTF-8")
         ircmsg = ircmsg.split()
         print(ircmsg)
         ircmsg = " ".join(ircmsg)
         success = ":SASL authentication successful"
-        failure = ":SASL authentication aborted"
+        failure = ":SASL authentication failed"
+        aborted = ":SASL authentication aborted"
         if success in ircmsg: 
-                return True
+            return True
         elif failure in ircmsg:
-                return False
+            return False
+        elif aborted in ircmsg:
+            return False
 
 def recieve(commandNone = False):
 
-    global t, nickname, hotmask, msg_type, chan, message, command, args
+    global t, nickname, hostmask, msg_type, chan, message, command, args
     
     binary_data = irc.recv(1024)
     # Decode data from UTF-8
-    #data = binary_data.decode("UTF-8", "ignore")
-    data = binary_data
+    data = binary_data.decode("UTF-8")
     # Split data by spaces
-    t = data.replace(":", "")#.split()
+    t = data.strip(":")#.split()
     t = t.split()
-    
+
     print (t)
     # Listen for PING
-
+    hostmask = ""
     if commandNone == False:
         command = "$None%"
 
@@ -207,8 +235,9 @@ def recieve(commandNone = False):
 
             message = t[3:]
 
-        if message and message[0].startswith(commandCharacter):
+        if message and message[0].startswith(":"+commandCharacter):
             command = " ".join(message).split()
+            command[0] = command[0].strip(":")
             command[0] = command[0].replace(commandCharacter, "")
             print("cmd", command)
     
@@ -265,6 +294,67 @@ def last(nickname = None, cmd = False):
             if i in message:
                 nicks[i].append[message] + " "
 
+def isHostmask(mask):
+    if "!" in mask and "@" in mask:
+        return True
+    else:
+        return False
+
+def gethostmask(nick):
+    irc.send("WHO {0}\r\n".format(nick).encode("UTF-8"))
+    ircmsg = irc.recv(2048)
+    ircmsg = ircmsg.decode("UTF-8")
+    ircmsg = ircmsg.strip("\r\n")
+    ircmsg = ircmsg.strip(":")
+    ircmsg = ircmsg.split()
+    print(ircmsg)
+    if ircmsg[1] == "352":
+        user = ircmsg[4]
+        host = ircmsg[5]
+        hm = "{0}!{1}@{2}".format(nick, user, host)
+        return hm
+    else:
+        return False
+
+def banmask(nick):
+    mask = gethostmask(nick)
+    if not mask:
+        return False
+    nick = mask.split("!")[0]
+    user = mask.split("!")[1].split("@")[0]
+    host = mask.split("@")[1]
+    if host.startswith("gateway/"):
+        if "/irccloud.com/" in host:
+            uid = user[1:]
+            host = host.split("/")
+            host = "/".join(host[:-1])
+            bm = "*!*{0}@{1}/*".format(uid, host)
+            return bm
+        elif "/ip." in host:
+            host = host.split("/ip.")
+            host = host[1]
+            bm = "*!*@*{0}".format(host)
+            return bm
+        else:
+            host = host.split("/")
+            host = "/".join(host[:-1])
+            bm = "*!{0}@{1}/*".format(user, host)
+            return bm
+    elif host.startswith("nat/"):
+        host = host.split("/")
+        host = "/".join(host[:-1])
+        bm = "*!{0}@{1}/*".format(user, host)
+        return bm
+    elif "/" in host:
+        bm = "*!*@{0}".format(host)
+        return bm
+    elif user.startswith("~"):
+        bm = "*!*@{0}".format(host)
+        return bm
+    else:
+        bm = "*!{0}@{1}".join(user, host)
+        return bm
+
 #=========================================================================================#
 #=========================================================================================#
 #=========================================================================================#
@@ -281,7 +371,7 @@ while True:
         if t[3] == botnick + "," and t[4] == "char" or t[3] == botnick + ":" and t[4] == "char":
             irc.send("PRIVMSG {0} :{1}, My current command character is: {2}\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))            
     
-        if t[1] == "KICK" and t[3] == "BWBellairs[Bot]":
+        if t[1] == "KICK" and t[3] == botnick:
             irc.send("JOIN {0}\r\n".format(t[2]).encode("UTF-8"))
     except:
         pass
@@ -295,26 +385,26 @@ while True:
                     irc.send("PRIVMSG {0} :{1}, That permission lvl doesn't exist [1-2]\r\n".format(chan, nickname).encode("UTF-8"))
                 
                 elif int(command[1]) == 0:
-                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "04" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "\x0303" + ", ".join(userCommands)  + ",", "\x0304" + ", ".join(adminCommands) + ",", "\x0304" + ", ".join(ownerCommands)).encode("UTF-8"))
 
                 elif int(command[1]) == 1:
-                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "03" + ", ".join(adminCommands) + ",", "04" + ", ".join(ownerCommands)).encode("UTF-8"))
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "\x0303" + ", ".join(userCommands)  + ",", "\x0303" + ", ".join(adminCommands) + ",", "\x0304" + ", ".join(ownerCommands)).encode("UTF-8"))
                     
                 elif int(command[1]) == 2:
-                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "03" + ", ".join(userCommands)  + ",", "03" + ", ".join(adminCommands) + ",", "03" + ", ".join(ownerCommands)).encode("UTF-8"))
+                    irc.send("PRIVMSG {0} :{1}, Commands: {2} {3} {4}\r\n".format(chan, nickname, "\x0303" + ", ".join(userCommands)  + ",", "\x0303" + ", ".join(adminCommands) + ",", "\x0303" + ", ".join(ownerCommands)).encode("UTF-8"))
 
             else:
-                textToAdd = "03" + ", ".join(userCommands)  + ", " 
+                textToAdd = "\x0303" + ", ".join(userCommands)  + ", " 
                 if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
-                    textToAdd = textToAdd + "03"
+                    textToAdd = textToAdd + "\x0303"
                 else:
-                    textToAdd = textToAdd + "04"
+                    textToAdd = textToAdd + "\x0304"
                 textToAdd = textToAdd + ", ".join(adminCommands)
 
                 if nickname in stats and stats[nickname] == "2":
-                    textToAdd = textToAdd + "03"
+                    textToAdd = textToAdd + "\x0303"
                 else:
-                    textToAdd = textToAdd + "04"
+                    textToAdd = textToAdd + "\x0304"
                 textToAdd = textToAdd + ", " + ", ".join(ownerCommands)
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
 
@@ -323,11 +413,12 @@ while True:
                 
 
         elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
-            if nickname in stats:
-                irc.send("PRIVMSG {0} :{1} your permissions lvl is: {2}\r\n".format(chan, nickname, stats[nickname]).encode("UTF-8"))
-
+            if isOwner(hostmask):
+                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 2\r\n".format(chan, nickname).encode("UTF-8"))
+            elif isAdmin(hostmask):
+                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 1\r\n".format(chan, nickname).encode("UTF-8"))
             else:
-                irc.send("PRIVMSG {0} :{1} your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
 
         elif len(command) >= 2 and command[0] == "list" and command[1] == "channels":
             irc.send("PRIVMSG {0} :Channel(s) I'm in: {1}\r\n".format(nickname, ", ".join(channels)).encode("UTF-8"))
@@ -354,7 +445,7 @@ while True:
             irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, time()).encode("UTF-8"))
 
         elif command[0] == "echo":
-            irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "").replace("+b ", "").replace("+u ", "").replace("+yellow ", "08").replace("+purple ", "06").replace("+orange ", "07").replace("+reset ", "").replace("+gray ", "00").replace("+black ", "01").replace("+blue ", "02").replace("+green " , "03").replace("+red ", "04").replace("+brown ", "05").encode("UTF-8")))
+            irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "\x1D").replace("+b ", "\x02").replace("+u ", "\x1F").replace("+yellow ", "\x0308").replace("+purple ", "\x0306").replace("+orange ", "\x0307").replace("+reset ", "\x0F").replace("+gray ", "\x0300").replace("+black ", "\x0301").replace("+blue ", "\x0302").replace("+green " , "\x0303").replace("+red ", "\x0304").replace("+brown ", "\x0305")).encode("UTF-8"))
 
         elif command[0] == "bug":
             if len(command) >= 2:
@@ -365,8 +456,9 @@ while True:
             else:
                 irc.send("PRIVMSG {0} :{1}, No bug to report\r\n".format(chan, nickname).encode("UTF-8"))
 
-        elif len(command) >= 2 and command[0] == "list" and command[1] == "admins":
-            irc.send("PRIVMSG {0} :Bot admins are: {1}\r\n".format(nickname, " ".join(stats)).encode("UTF-8"))
+        # For now, this isn't going to work
+        #elif len(command) >= 2 and command[0] == "list" and command[1] == "admins":
+        #    irc.send("PRIVMSG {0} :Bot admins are: {1}\r\n".format(nickname, " ".join(stats)).encode("UTF-8"))
 
         elif command[0] == "calc":
             try:
@@ -395,7 +487,7 @@ while True:
             except:
                 irc.send("PRIVMSG {0} :{1}, INVALID: arguments. USAGE: *calc <var> <operator> <var>\r\n".format(chan, nickname).encode("UTF-8"))    
 
-    if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
+    if isAdmin(hostmask):
         if command[0] == "join" and command[1]:
             irc.send("JOIN {0}\r\n".format(command[1]).encode("UTF-8"))
             channels.append(command[1])
@@ -418,39 +510,44 @@ while True:
             else:
                 irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *kick <nickname> [reason]\r\n".format(chan, nickname).encode("UTF-8"))
 
-        elif command[0] == "op" and len(command) >= 2:
+        elif command[0] == "op" and len(command) >= 1:
             if len(command) == 1:
                 irc.send("MODE {0} +o {1}\r\n".format(chan, nickname).encode("UTF-8"))
 
             else:
                 irc.send("MODE {0} +o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "deop" and len(command) >= 2:
+        elif command[0] == "deop" and len(command) >= 1:
             if len(command) == 1:
                 irc.send("MODE {0} -o {1}\r\n".format(chan, nickname).encode("UTF-8"))
 
             else:
                 irc.send("MODE {0} -o {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "sop" and len(command) >= 2:
+        elif command[0] == "sop" and len(command) >= 1:
             if len(command) == 1:
                 irc.send("PRIVMSG ChanServ :OP {0}\r\n".format(chan).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG ChanServ :OP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "sdeop" and len(command) >= 2:
+        elif command[0] == "sdeop" and len(command) >= 1:
             if len(command) == 1:
                 irc.send("PRIVMSG ChanServ :DEOP {0}\r\n".format(chan).encode("UTF-8"))
 
             else:
                 irc.send("PRIVMSG ChanServ :DEOP {0} {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
-        elif command[0] == "ban and len(command) >= 2":
-            irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
-            recieve(True)
-            irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
-            bans[command[1]] = t[5]
+        elif command[0] == "ban" and len(command) >= 2:
+            if isHostmask(command[1]):
+                mask = command[1]
+            else:
+                mask = banmask(command[1])
+                if not mask:
+                    irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
+                    continue
+            irc.send("MODE {0} +b {1}\r\n".format(chan, mask).encode("UTF-8"))
+            bans[command[1]] = mask
 
         elif command[0] == "unban" and len(command) >= 2:
             try:
@@ -460,11 +557,16 @@ while True:
                 pass
 
         elif command[0] == "kban" and len(command) >= 2:
-            irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
-            recieve(True)
-            irc.send("MODE {0} +b {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+            if isHostmask(command[1]):
+                mask = command[1]
+            else:
+                mask = banmask(command[1])
+                if not mask:
+                    irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
+                    continue
+            irc.send("MODE {0} +b {1}\r\n".format(chan, mask).encode("UTF-8"))
             irc.send("KICK {0} {1} :{2}\r\n".format(chan, t[7], " ".join(command[2:]) or "Kicked/moo", nickname).encode("UTF-8"))
-            bans[command[1]] = t[5]
+            bans[command[1]] = mask
 
         elif command[0] == "channel" and command[1] == "links":
             channelLink(command[2], command[3], command[4])
@@ -479,16 +581,26 @@ while True:
             irc.send("MODE {0} -v {1}\r\n".format(chan, command[1]).encode("UTF-8"))
 
         elif command[0] == "quiet" and len(command) >= 2:
-            irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
-            recieve(True)
-            irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+            if isHostmask(command[1]):
+                mask = command[1]
+            else:
+                mask = banmask(command[1])
+                if not mask:
+                    irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
+                    continue
+            irc.send("MODE {0} +q {1}\r\n".format(chan, mask).encode("UTF-8"))
 
         elif command[0] == "unquiet" and len(command) >= 2:
-            irc.send("WHO {0}\r\n".format(command[1]).encode("UTF-8"))
-            recieve(True)
-            irc.send("MODE {0} +q {1}\r\n".format(chan, t[5]).encode("UTF-8"))
+            if isHostmask(command[1]):
+                mask = command[1]
+            else:
+                mask = banmask(command[1])
+                if not mask:
+                    irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
+                    continue
+            irc.send("MODE {0} -q {1}\r\n".format(chan, mask).encode("UTF-8"))
 
-    if nickname in stats and stats[nickname] == "2":
+    if isOwner(hostmask):
         if command[0] == "quit":
             perms(True)
             if len(command) > 1:
@@ -502,20 +614,41 @@ while True:
         elif command[0] == "r":
             perms(True)
             irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
-            execfile("main.py")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
                 
         elif len(command) >= 2 and command[0] == "permissions" and command[2] == "=":
             try:
                 if command[3] == "1" or command[3] == "0" or command[3] == "2":
+                    if isHostmask(command[1]):
+                        mask = command[1]
+                    else:
+                        mask = banmask(command[1])
+                        if not mask:
+                            irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname))
+                            continue
                     if command[3] == "0":
                         try:
-                            del stats[command[1]]
-                            irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to 0\r\n".format(chan, nickname, command[1]).encode("UTF-8"))
+                            if mask in admins:
+                                admins.remove(mask)
+                            if mask in owners:
+                                owners.remove(mask)
+                            perms(True)
+                            irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to 0\r\n".format(chan, nickname, mask).encode("UTF-8"))
                         except:
                             pass
                     elif command[3] == "1" or command[3] == "2":
-                        stats[command[1]] = command[3]
-                        irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, command[1], command[3]).encode("UTF-8"))
+                        if command[3] == "1":
+                            if mask in owners:
+                                owners.remove(mask)
+                            if not mask in admins:
+                                admins.append(mask)
+                        if command[3] == "2":
+                            if mask in admins:
+                                admins.remove(mask)
+                            if not mask in owners:
+                                owners.append(mask)
+                        perms(True)
+                        irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to {3}\r\n".format(chan, nickname, mask, command[3]).encode("UTF-8"))
                     else:
                         irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
             except:
