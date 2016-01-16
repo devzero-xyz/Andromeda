@@ -232,6 +232,19 @@ def update():
             for i in admins:
                 irc.send("PRIVMSG {0} :Update available\r\n".format(i).encode("UTF-8"))
                 irc.send("PRIVMSG {0} :Updating\r\n".format(i).encode("UTF-8"))
+
+            with open("main.py", "w") as writeToFile:
+                with open("main[Online].py", "r") as newFile:
+                    writeToFile.write(newFile.read())
+                    newFile.close()
+                    writeToFile.close()
+                    execFile("main.py")
+                    for i in owners:
+                        irc.send("PRIVMSG {0} :Finished updating\r\n".format(i).encode("UTF-8"))
+                        irc.send("PRIVMSG {0} :Restarting\r\n".format(i).encode("UTF-8"))
+                    for i in admins:
+                        irc.send("PRIVMSG {0} :Finished updating\r\n".format(i).encode("UTF-8"))
+                        irc.send("PRIVMSG {0} :Restarting\r\n".format(i).encode("UTF-8"))
         
         sleep(10)
 
