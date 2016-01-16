@@ -9,6 +9,7 @@ import ssl
 from random import *
 import os
 import sys
+import threading
 
 startTime = time()
 messagesSeen = 0
@@ -202,6 +203,41 @@ def connectAndIdentify(botnick = botnick):
                 username, password).encode("UTF-8"))  # auth
 
     irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
+
+def update():
+
+    while True:
+        """
+        Downloads new source code for this IRC bot and runs it. Make sure you're 
+        sending new code over HTTPS from a trusted vendor. The URL of the source is
+        specified inside the relaybox configuration. Also make sure that the config
+        you have right now will match the config that the new code supports.
+        """
+        import urllib
+        from os import execl
+        from sys import argv
+        urllib.urlretrieve("https://raw.githubusercontent.com/BWBellairs/BWBellairsBot/master/main.py", 'main[Online].py')
+        with open("main[Online].py", "r") as oldFile:
+            oldLen = len(oldFile.readlines())
+            oldFile.close()
+
+        with open("main[Online].py", "r") as newFile:
+            newLen = len(newFile.readlines())
+            newFile.close()
+
+        if oldLen > newLen or oldLen > newLen:
+            for i in owners:
+                irc.send("PRIVMSG {0} :Update available\r\n".format(i).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :Updating\r\n".format(i).encode("UTF-8"))
+            for i in admins:
+                irc.send("PRIVMSG {0} :Update available\r\n".format(i).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :Updating\r\n".format(i).encode("UTF-8"))
+        
+        sleep(10)
+
+updateCall = threading.Thread(target=update)
+updateCall.setDaemon(True)
+updateCall.start()
 
 def confirmsasl():
     while True:
