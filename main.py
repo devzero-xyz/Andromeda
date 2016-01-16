@@ -79,10 +79,12 @@ owners = []
 
 admins = []
 
-def perms(write = False):
-    global owners, admins
+ignores = []
 
-    if write == False:
+def perms(write = False):
+    global owners, admins, ignores
+
+    if not write:
         with open("admins.txt", "r+") as perms1:
             perms11 = perms1.read()
             perms11 = perms11.strip(" \n")
@@ -95,15 +97,25 @@ def perms(write = False):
             owners = perms11.split("\n")
             perms1.close()
 
-    if write == True:
+        with open("ignores.txt", "r+") as perms1:
+            perms11 = perms1.read()
+            perms11 = perms11.strip(" \n")
+            ignores = perms11.split("\n")
+            perms1.close()
+
+    if write:
         with open("admins.txt", "w") as perms2:
             for i in admins:
                 perms2.write(i + "\n")
             perms2.close()
 
-    if write == True:
         with open("owners.txt", "w") as perms2:
             for i in owners:
+                perms2.write(i + "\n")
+            perms2.close()
+
+        with open("ignores.txt", "w") as perms2:
+            for i in ignores:
                 perms2.write(i + "\n")
             perms2.close()
 
@@ -123,6 +135,13 @@ def isAdmin(mask):
     for i in admins:
         isadmin = fnmatch(mask, i)
         if isadmin:
+            return True
+    return False
+
+def isIgnored(mask):
+    for i in ignores:
+        isignored = fnmatch(mask, i)
+        if isignored:
             return True
     return False
 
@@ -367,6 +386,9 @@ while True:
     channelLink()
     last(None, "refresh")
 
+    if isIgnored(hostmask):
+        continue
+
     try:
         if t[3] == botnick + "," and t[4] == "char" or t[3] == botnick + ":" and t[4] == "char":
             irc.send("PRIVMSG {0} :{1}, My current command character is: {2}\r\n".format(chan, nickname, commandCharacter).encode("UTF-8"))            
@@ -395,13 +417,13 @@ while True:
 
             else:
                 textToAdd = "\x0303" + ", ".join(userCommands)  + ", " 
-                if nickname in stats and stats[nickname] == "1" or nickname in stats and stats[nickname] == "2":
+                if isAdmin(hostmask):
                     textToAdd = textToAdd + "\x0303"
                 else:
                     textToAdd = textToAdd + "\x0304"
                 textToAdd = textToAdd + ", ".join(adminCommands)
 
-                if nickname in stats and stats[nickname] == "2":
+                if isOwner(hostmask):
                     textToAdd = textToAdd + "\x0303"
                 else:
                     textToAdd = textToAdd + "\x0304"
@@ -417,6 +439,8 @@ while True:
                 irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 2\r\n".format(chan, nickname).encode("UTF-8"))
             elif isAdmin(hostmask):
                 irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 1\r\n".format(chan, nickname).encode("UTF-8"))
+            elif isIgnored(hostmask):
+                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: -1\r\n".format(chan, nickname).encode("UTF-8"))
             else:
                 irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
 
@@ -445,7 +469,7 @@ while True:
             irc.send("PRIVMSG {0} :{1}, {2}\r\n".format(chan, nickname, time()).encode("UTF-8"))
 
         elif command[0] == "echo":
-            irc.send("PRIVMSG {0} :{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "\x1D").replace("+b ", "\x02").replace("+u ", "\x1F").replace("+yellow ", "\x0308").replace("+purple ", "\x0306").replace("+orange ", "\x0307").replace("+reset ", "\x0F").replace("+gray ", "\x0300").replace("+black ", "\x0301").replace("+blue ", "\x0302").replace("+green " , "\x0303").replace("+red ", "\x0304").replace("+brown ", "\x0305")).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :\u200B{1}\r\n".format(chan, " ".join(command[1:]).replace("+i ", "\x1D").replace("+b ", "\x02").replace("+u ", "\x1F").replace("+yellow ", "\x0308").replace("+purple ", "\x0306").replace("+orange ", "\x0307").replace("+reset ", "\x0F").replace("+gray ", "\x0300").replace("+black ", "\x0301").replace("+blue ", "\x0302").replace("+green " , "\x0303").replace("+red ", "\x0304").replace("+brown ", "\x0305")).encode("UTF-8"))
 
         elif command[0] == "bug":
             if len(command) >= 2:
@@ -618,7 +642,7 @@ while True:
                 
         elif len(command) >= 2 and command[0] == "permissions" and command[2] == "=":
             try:
-                if command[3] == "1" or command[3] == "0" or command[3] == "2":
+                if command[3] == "1" or command[3] == "0" or command[3] == "2" or command[3] == "-1":
                     if isHostmask(command[1]):
                         mask = command[1]
                     else:
@@ -626,12 +650,26 @@ while True:
                         if not mask:
                             irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname))
                             continue
-                    if command[3] == "0":
+                    if command[3] == "-1":
                         try:
                             if mask in admins:
                                 admins.remove(mask)
                             if mask in owners:
                                 owners.remove(mask)
+                            if not mask in ignores:
+                                ignores.append(mask)
+                            perms(True)
+                            irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to -1\r\n".format(chan, nickname, mask).encode("UTF-8"))
+                        except:
+                            pass
+                    elif command[3] == "0":
+                        try:
+                            if mask in admins:
+                                admins.remove(mask)
+                            if mask in owners:
+                                owners.remove(mask)
+                            if mask in ignores:
+                                ignores.remove(mask)
                             perms(True)
                             irc.send("PRIVMSG {0} :{1}, {2} permissions lvl set to 0\r\n".format(chan, nickname, mask).encode("UTF-8"))
                         except:
@@ -640,11 +678,15 @@ while True:
                         if command[3] == "1":
                             if mask in owners:
                                 owners.remove(mask)
+                            if mask in ignores:
+                                ignores.remove(mask)
                             if not mask in admins:
                                 admins.append(mask)
                         if command[3] == "2":
                             if mask in admins:
                                 admins.remove(mask)
+                            if mask in ignores:
+                                ignores.remove(mask)
                             if not mask in owners:
                                 owners.append(mask)
                         perms(True)
