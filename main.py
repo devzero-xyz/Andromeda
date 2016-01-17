@@ -479,7 +479,7 @@ while True:
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
 
         elif command[0] == "status":
-            irc.send("PRIVMSG {0} :I have been awake {1} minutes and {2} hours on {3}. I  and have seen {4} messages.\r\n".format(chan, int(time()) - int(startTime)) / 60, int(time()) - int(startTime)), network, messagesSeen).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :I have been awake {1} minutes and {2} hours on {3}. I  and have seen {4} messages.\r\n".format(chan, int(int(time()) - int(startTime)) / 60, int(int(time()) - int(startTime)), network, messagesSeen).encode("UTF-8"))
                 
 
         elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
