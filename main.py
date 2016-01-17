@@ -242,6 +242,7 @@ def update():
             print("[Updater] Updates completed")
             print("[Updater] Restarting...")
             irc.send("QUIT :Updating\r\n".encode("UTF-8"))
+            sleep(0.5)
             os.execv(sys.executable, [sys.executable] + sys.argv)
         sleep(10)
 
