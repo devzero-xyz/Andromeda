@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Test for auto updater
+
 from __future__ import print_function
 from base64 import b64encode
 from time import sleep, time
