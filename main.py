@@ -498,14 +498,14 @@ while True:
                     if not mask:
                         irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
                         continue
-                    if isOwner(mask):
-                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 2\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
-                    elif isAdmin(mask):
-                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
-                    elif isIgnored(mask):
-                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: -1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
-                    else:
-                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 0\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                if isOwner(mask):
+                    irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 2\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                elif isAdmin(mask):
+                    irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                elif isIgnored(mask):
+                    irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: -1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                else:
+                    irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 0\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
 
         elif len(command) >= 2 and command[0] == "list" and command[1] == "channels":
             irc.send("PRIVMSG {0} :Channel(s) I'm in: {1}\r\n".format(nickname, ", ".join(channels)).encode("UTF-8"))
