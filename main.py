@@ -269,7 +269,7 @@ def confirmsasl():
 
 def recieve(commandNone = False):
 
-    global t, nickname, hostmask, msg_type, chan, message, command, args
+    global t, nickname, hostmask, msg_type, chan, message, command, args, network
     
     binary_data = irc.recv(1024)
     # Decode data from UTF-8
@@ -287,6 +287,7 @@ def recieve(commandNone = False):
     if t[0] == "PING":
         # Respond with PONG
         irc.send("PONG\r\n".encode("UTF-8"))
+        network = t[1]
 
     elif "!" in t[0]:
         nickname = t[0].split("!")[0]
@@ -478,7 +479,7 @@ while True:
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
 
         elif command[0] == "status":
-            irc.send("PRIVMSG {0} :I have been awake {1} minutes and have seen {2} messages.\r\n".format(chan, (int(time()) - int(startTime)) / 60, messagesSeen).encode("UTF-8"))
+            irc.send("PRIVMSG {0} :I have been awake {1} minutes and {2} hours on {3}. I  and have seen {4} messages.\r\n".format(chan, int(time()) - int(startTime)) / 60, int(time()) - int(startTime)), network, messagesSeen).encode("UTF-8"))
                 
 
         elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
