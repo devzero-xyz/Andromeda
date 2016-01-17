@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+#Need to add modules
 from __future__ import print_function
 from base64 import b64encode
 from time import sleep, time
@@ -237,8 +237,8 @@ def update():
                     writeToFile.write(newFile.read())
                     newFile.close()
                     writeToFile.close()
-            for i in channels:
-                irc.send("PRIVMSG {0} :[Updater] Update has been found and applied | Update URL - [{1}]\r\n".format(i, updateUrl).encode("UTF-8"))
+            #for i in channels:
+             #   irc.send("PRIVMSG {0} :[Updater] Update has been found and applied | Update URL - [{1}]\r\n".format(i, updateUrl).encode("UTF-8"))
             print("[Updater] Updates completed")
             print("[Updater] Restarting...")
             irc.send("QUIT :Updating\r\n".encode("UTF-8"))
