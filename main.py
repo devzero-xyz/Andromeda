@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# First bot design was made by BWBellairs
 
 from __future__ import print_function
 from base64 import b64encode
