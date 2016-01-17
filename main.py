@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# This comment is for testing.
 
 from __future__ import print_function
 from base64 import b64encode
@@ -482,14 +481,31 @@ while True:
                 
 
         elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
-            if isOwner(hostmask):
-                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 2\r\n".format(chan, nickname).encode("UTF-8"))
-            elif isAdmin(hostmask):
-                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 1\r\n".format(chan, nickname).encode("UTF-8"))
-            elif isIgnored(hostmask):
-                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: -1\r\n".format(chan, nickname).encode("UTF-8"))
+            if len(command) == 2:
+                if isOwner(hostmask):
+                    irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 2\r\n".format(chan, nickname).encode("UTF-8"))
+                elif isAdmin(hostmask):
+                    irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 1\r\n".format(chan, nickname).encode("UTF-8"))
+                elif isIgnored(hostmask):
+                    irc.send("PRIVMSG {0} :{1}, your permissions lvl is: -1\r\n".format(chan, nickname).encode("UTF-8"))
+                else:
+                    irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
             else:
-                irc.send("PRIVMSG {0} :{1}, your permissions lvl is: 0\r\n".format(chan, nickname).encode("UTF-8"))
+                if isHostmask(command[2]):
+                    mask = command[2]
+                else:
+                    mask = gethostmask(command[2])
+                    if not mask:
+                        irc.send("PRIVMSG {0} :{1}, ERROR: No such nick\r\n".format(chan, nickname).encode("UTF-8"))
+                        continue
+                    if isOwner(mask):
+                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 2\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                    elif isAdmin(mask):
+                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                    elif isIgnored(mask):
+                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: -1\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
+                    else:
+                        irc.send("PRIVMSG {0} :{1}, {2}'s permissions lvl is: 0\r\n".format(chan, nickname, command[2]).encode("UTF-8"))
 
         elif len(command) >= 2 and command[0] == "list" and command[1] == "channels":
             irc.send("PRIVMSG {0} :Channel(s) I'm in: {1}\r\n".format(nickname, ", ".join(channels)).encode("UTF-8"))
