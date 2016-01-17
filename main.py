@@ -10,6 +10,8 @@ from random import *
 import os
 import sys
 import threading
+import hashlib
+import urllib.request
 
 startTime = time()
 messagesSeen = 0
@@ -213,39 +215,32 @@ def update():
         specified inside the relaybox configuration. Also make sure that the config
         you have right now will match the config that the new code supports.
         """
-        import urllib
-        from os import execl
-        from sys import argv
-        urllib.urlretrieve("https://raw.githubusercontent.com/BWBellairs/BWBellairsBot/master/main.py", 'main[Online].py')
-        with open("main[Online].py", "r") as oldFile:
-            oldLen = len(oldFile.readlines())
+        urllib.request.urlretrieve("https://raw.githubusercontent.com/BWBellairs/BWBellairsBot/master/main.py", 'main[Online].py')
+        with open("main.py", "rb") as oldFile:
+            data = oldFile.read()
+            oldHash = hashlib.md5(data)
+            oldHash = oldHash.hexdigest()
             oldFile.close()
 
-        with open("main[Online].py", "r") as newFile:
-            newLen = len(newFile.readlines())
+        with open("main[Online].py", "rb") as newFile:
+            data = newFile.read()
+            newHash = hashlib.md5(data)
+            newHash = newHash.hexdigest()
             newFile.close()
 
-        if oldLen > newLen or oldLen > newLen:
-            for i in owners:
-                irc.send("PRIVMSG {0} :Update available\r\n".format(i).encode("UTF-8"))
-                irc.send("PRIVMSG {0} :Updating\r\n".format(i).encode("UTF-8"))
-            for i in admins:
-                irc.send("PRIVMSG {0} :Update available\r\n".format(i).encode("UTF-8"))
-                irc.send("PRIVMSG {0} :Updating\r\n".format(i).encode("UTF-8"))
-
+        print("[Updater] Checking for updates")
+        if oldHash != newHash:
+            print("[Updater] Updates found")
+            print("[Updater] Updating...")
             with open("main.py", "w") as writeToFile:
                 with open("main[Online].py", "r") as newFile:
                     writeToFile.write(newFile.read())
                     newFile.close()
                     writeToFile.close()
-                    execFile("main.py")
-                    for i in owners:
-                        irc.send("PRIVMSG {0} :Finished updating\r\n".format(i).encode("UTF-8"))
-                        irc.send("PRIVMSG {0} :Restarting\r\n".format(i).encode("UTF-8"))
-                    for i in admins:
-                        irc.send("PRIVMSG {0} :Finished updating\r\n".format(i).encode("UTF-8"))
-                        irc.send("PRIVMSG {0} :Restarting\r\n".format(i).encode("UTF-8"))
-        
+            print("[Updater] Updates completed")
+            print("[Updater] Restarting...")
+            irc.send("QUIT :Updating\r\n".encode("UTF-8"))
+            os.execv(sys.executable, [sys.executable] + sys.argv)
         sleep(10)
 
 updateCall = threading.Thread(target=update)
