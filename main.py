@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 from base64 import b64encode
-from subprocess import Popen
 from time import sleep, time
 from fnmatch import fnmatch
 import socket
@@ -243,9 +242,7 @@ def update():
             print("[Updater] Updates completed")
             print("[Updater] Restarting...")
             irc.send("QUIT :Updating\r\n".encode("UTF-8"))
-            Popen("python main.py &", shell=True)
-            sys.exit(0)
-            #os.execv(sys.executable, [sys.executable] + sys.argv)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
         sleep(10)
 
 updateCall = threading.Thread(target=update)
