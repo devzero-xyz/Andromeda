@@ -207,7 +207,7 @@ def connectAndIdentify(botnick = botnick):
     irc.send("JOIN {0}\r\n".format(",".join(channels)).encode("UTF-8"))  # join the channel(s)
 
 def update():
-
+    updateUrl = "https://raw.githubusercontent.com/BWBellairs/BWBellairsBot/master/main.py"
     while True:
         """
         Downloads new source code for this IRC bot and runs it. Make sure you're 
@@ -215,7 +215,7 @@ def update():
         specified inside the relaybox configuration. Also make sure that the config
         you have right now will match the config that the new code supports.
         """
-        urllib.request.urlretrieve("https://raw.githubusercontent.com/BWBellairs/BWBellairsBot/master/main.py", 'main[Online].py')
+        urllib.request.urlretrieve(updateUrl, 'main[Online].py')
         with open("main.py", "rb") as oldFile:
             data = oldFile.read()
             oldHash = hashlib.md5(data)
