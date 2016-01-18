@@ -18,6 +18,7 @@ messagesSeen = 0
 commandCharacter = "*"
 botnick = "BWBellairs[Bot]"
 nickname = "0"
+autoupdate = True
 
 def setupCommands(char = commandCharacter):
     global userCommands, adminCommands, ownerCommands, commandCharacter
@@ -246,9 +247,10 @@ def update():
             os.execv(sys.executable, [sys.executable] + sys.argv)
         sleep(10)
 
-updateCall = threading.Thread(target=update)
-updateCall.setDaemon(True)
-updateCall.start()
+if autoupdate:
+    updateCall = threading.Thread(target=update)
+    updateCall.setDaemon(True)
+    updateCall.start()
 
 def confirmsasl():
     while True:
