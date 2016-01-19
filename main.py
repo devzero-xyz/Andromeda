@@ -490,9 +490,9 @@ while True:
         elif command[0] == "status":
             timeDiff = time() - startTime
             timeDiff1 = strftime("%H %M %S", gmtime(timeDiff)).split()
-            hours = timeDiff1[0]
-            mins = timeDiff1[1]
-            secs = timeDiff1[2]
+            hours = str(int(timeDiff1[0]))
+            mins = str(int(timeDiff1[1]))
+            secs = str(int(timeDiff1[2]))
             irc.send("PRIVMSG {0} :I have been awake {1} hour(s), {2} minute(s) and {3} second(s) on {4} and I have seen {5} message(s).\r\n".format(chan, hours, mins, secs, network, messagesSeen).encode("UTF-8"))
                 
 
