@@ -283,6 +283,7 @@ def recieve(commandNone = False):
     print (t)
     # Listen for PING
     hostmask = ""
+    network = server
     if commandNone == False:
         command = "$None%"
 
