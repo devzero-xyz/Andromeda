@@ -151,7 +151,7 @@ def isIgnored(mask):
 
 def connectAndIdentify(botnick = botnick):
 
-    global irc, channels
+    global irc, channels, server
 
     with open("password.txt", "r+") as passwordFile:
         password = passwordFile.readline()
