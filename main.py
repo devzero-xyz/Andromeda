@@ -286,6 +286,12 @@ def recieve(commandNone = False):
     if commandNone == False:
         command = "$None%"
 
+    if not len(t) > 0:
+        return []
+
+    if t[0] == "ERROR" and " ".join(t[1:3]) == ":Closing Link:":
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
     if t[0] == "PING":
         # Respond with PONG
         irc.send("PONG\r\n".encode("UTF-8"))
