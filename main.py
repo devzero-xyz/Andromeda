@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from base64 import b64encode
-from time import sleep, time
+from time import sleep, time, strftime, gmtime
 from fnmatch import fnmatch
 import socket
 import ssl
@@ -488,7 +488,12 @@ while True:
                 irc.send("PRIVMSG {0} : {1}, Commands: {2}\r\n".format(chan, nickname, textToAdd).encode("UTF-8"))
 
         elif command[0] == "status":
-            irc.send("PRIVMSG {0} :I have been awake {1} minutes and {2} hours on {3}. I  and have seen {4} messages.\r\n".format(chan, int(int(time()) - int(startTime)) / 60, int(int(time()) - int(startTime)), network, messagesSeen).encode("UTF-8"))
+            timeDiff = time() - startTime
+            timeDiff1 = strftime("%H %M %S", gmtime(timeDiff)).split()
+            hours = timeDiff1[0]
+            mins = timeDiff1[1]
+            secs = timeDiff[2]
+            irc.send("PRIVMSG {0} :I have been awake {1} hour(s), {2} minute(s) and {3} second(s) on {4} and I have seen {5} message(s).\r\n".format(chan, hours, mins, secs, network, messagesSeen).encode("UTF-8"))
                 
 
         elif len(command) >= 2 and command[0] == "perm" and  command[1] == "level":
