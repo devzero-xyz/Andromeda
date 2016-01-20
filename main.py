@@ -275,7 +275,7 @@ def recieve(commandNone = False):
     
     binary_data = irc.recv(1024)
     # Decode data from UTF-8
-    data = binary_data.decode("UTF-8")
+    data = binary_data.decode("UTF-8", "ignore")
     # Split data by spaces
     t = data.strip(":")#.split()
     t = t.split()
