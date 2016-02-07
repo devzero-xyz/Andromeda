@@ -779,7 +779,7 @@ while True:
                 irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
 
     #except:
-     #   pass
+     #  pass
 
     messagesSeen += 1
 
