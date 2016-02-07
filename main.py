@@ -20,6 +20,19 @@ botnick = "BWBellairs[Bot]"
 nickname = "0"
 autoupdate = True
 
+def fifopipe():
+    if not os.path.exists("fifo"):
+        os.mkfifo("fifo")
+    with open("fifo", "r") as pipein:
+        while True:
+            line = pipein.readline()[:-1]
+            if len(line) > 0:
+                irc.send("{0}\r\n".format(line).encode("UTF-8"))
+
+fifoThread = threading.Thread(target=fifopipe)
+fifoThread.setDaemon(True)
+fifoThread.start()
+
 def setupCommands(char = commandCharacter):
     global userCommands, adminCommands, ownerCommands, commandCharacter
 
