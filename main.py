@@ -239,7 +239,7 @@ def update():
                     newFile.close()
                     writeToFile.close()
             for i in channels:
-                irc.send("PRIVMSG {0} :[Updater] Update has been found and applied | Update URL - [{1}]\r\n".format(i, updateUrl).encode("UTF-8"))
+                irc.send("PRIVMSG {0} :[Updater] Update has been found and applied | Changes here: [https://github.com/BWBellairs/BWBellairsBot/commit/master]\r\n".format(i).encode("UTF-8"))
             print("[Updater] Updates completed")
             print("[Updater] Restarting...")
             irc.send("QUIT :Updating\r\n".encode("UTF-8"))
@@ -779,7 +779,7 @@ while True:
                 irc.send("PRIVMSG {0} :{1}, INVALID: syntax. USAGE: *permissions = 0/1\r\n".format(chan, nickname).encode("UTF-8"))
 
     #except:
-     #  pass
+     #   pass
 
     messagesSeen += 1
 
