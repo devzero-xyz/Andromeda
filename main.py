@@ -714,6 +714,9 @@ while True:
 
             quit()
             
+        elif command[0] == "update":
+            update()
+            
         elif command[0] == "r":
             perms(True)
             irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
