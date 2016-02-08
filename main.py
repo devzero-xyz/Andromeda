@@ -732,7 +732,7 @@ while True:
             
         elif command[0] == "eval":
             try:
-                exec(" ".join(command[0:]))
+                exec(" ".join(command[1:]))
             except:
                 irc.send("PRIVMSG {0} :{1}: Something went wrong... LEARN TO PYTHON\r\n".format(chan, nickname).encode("UTF-8"))
             
