@@ -730,6 +730,12 @@ while True:
         elif command[0] == "update":
             update()
             
+        elif command[0] == "eval":
+            try:
+                exec(" ".join(command[0:])
+            except:
+                irc.send("PRIVMSG {0} :{1}: Something went wrong... LEARN TO PYTHON\r\n".format(chan, nickname).encode("UTF-8"))
+            
         elif command[0] == "r":
             perms(True)
             irc.send("QUIT :Restarting\r\n".encode("UTF-8"))
