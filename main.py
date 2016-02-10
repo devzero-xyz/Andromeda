@@ -28,6 +28,7 @@ def fifopipe():
             line = pipein.readline()[:-1]
             if len(line) > 0:
                 irc.send("{0}\r\n".format(line).encode("UTF-8"))
+            sleep(0.2)
 
 fifoThread = threading.Thread(target=fifopipe)
 fifoThread.setDaemon(True)
