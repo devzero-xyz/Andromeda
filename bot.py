@@ -2,6 +2,7 @@
 from fnmatch import fnmatch
 from time import sleep
 import irc.connection
+import irc.buffer
 import irc.client
 import traceback
 import threading
@@ -109,6 +110,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.connect_factory = irc.connection.Factory(
                                                     bind_address=self.bindaddr,
                                                     ipv6=self.ipv6)
+        self.connection.buffer_class = irc.buffer.LenientDecodingLineBuffer
         self.caps = ["account-notify", "extended-join"]
         if self.sasl:
             self.caps.append("sasl")
