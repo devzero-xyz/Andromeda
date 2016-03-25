@@ -1,11 +1,8 @@
-# BWBellairsBot
-An IRC bot
+# Andromeda
+Python 3 IRC bot
 
-A bot built specifically for freenode.
- 	It's a fully customisable bot you can download and use yourself
-  
-If your interested in the bot or just spot something that you don't think is right,
- 	Push your own commits the the main repo.
-  
-Thanks,
-	BWBellairs
+## Getting Started
+1. Clone this repository
+2. Install dependencies using `pip install -r requirements.txt`
+3. Write a config file (for an example, see config.json.example)
+4. Start the bot using `./bot.py <config>`

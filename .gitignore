@@ -1,5 +1,11 @@
+plugins/*.noload
+wip-plugins/
+__pycache__
+ircize
+fifo
+log
+src
+.~*
+*.db
 *.pyc
-Bugs.txt
-password.txt
-ops.txt
-main[Online].py
+*.json
