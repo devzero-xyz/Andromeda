@@ -1,4 +1,4 @@
-# Andromeda
+# Andromeda [![Build Status](https://travis-ci.org/devzero-xyz/Andromeda.svg?branch=master)](https://travis-ci.org/devzero-xyz/Andromeda)
 Python 3 IRC bot
 
 ## Getting Started
