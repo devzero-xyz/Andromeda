@@ -163,26 +163,28 @@ def irccmp(str1, str2):
     else:
         return False
 
-def gethm(irc, nick):
+def gethm(irc, nick, use_cache=False):
     hmask = None
-    gotwho.clear()
-    irc.who(nick)
-    while not gotwho.is_set():
-        gotwho.wait()
+    if not use_cache:
+        gotwho.clear()
+        irc.who(nick)
+        while not gotwho.is_set():
+            gotwho.wait()
     for user in irc.state["users"].keys():
         if irccmp(user, nick):
             nick = user
             user = irc.state["users"][nick]["user"]
             host = irc.state["users"][nick]["host"]
             hmask = irclib.NickMask.from_params(nick, user, host)
-    gotwho.clear()
+    if gotwho.is_set():
+        gotwho.clear()
     return hmask
 
 def ban_affects(irc, channel, bmask):
     affected = []
     try:
         for nick in irc.state["channels"][channel]["names"]:
-            if fnmatch(irclower(gethm(irc, nick)), irclower(bmask)):
+            if fnmatch(irclower(gethm(irc, nick, True)), irclower(bmask)):
                 affected.append(nick)
         return affected
     except KeyError:
