@@ -48,14 +48,31 @@ def add_handler(func):
 
 def is_owner(irc, hostmask, channel=None):
     hostmask = str(hostmask)
+    nick = irclib.NickMask(hostmask).nick
     for owner in irc.owners:
-        if fnmatch(irclower(hostmask), irclower(owner)):
+        if owner.startswith("$a") and getacc(irc, nick, True):
+            if owner == "$a":
+                return True
+            else:
+                owner = owner.lstrip("$a:")
+                account = getacc(irc, nick, True)
+                if irccmp(account, owner):
+                    return True
+        elif fnmatch(irclower(hostmask), irclower(owner)):
             return True
     if channel:
         try:
             owners = irc.channels[channel].get("owners", [])
             for owner in owners:
-                if fnmatch(irclower(hostmask), irclower(owner)):
+                if owner.startswith("$a") and getacc(irc, nick, True):
+                    if owner == "$a":
+                        return True
+                    else:
+                        owner = owner.lstrip("$a:")
+                        account = getacc(irc, nick, True)
+                        if irccmp(account, owner):
+                            return True
+                elif fnmatch(irclower(hostmask), irclower(owner)):
                     return True
         except KeyError:
             return False
@@ -63,19 +80,36 @@ def is_owner(irc, hostmask, channel=None):
 
 def is_allowed(irc, hostmask, channel=None):
     hostmask = str(hostmask)
+    nick = irclib.NickMask(hostmask).nick
     if is_owner(irc, hostmask, channel):
         return True
     if channel:
         try:
             allowed = irc.channels[channel].get("allowed", [])
             for allow in allowed:
-                if fnmatch(irclower(hostmask), irclower(allow)):
+                if allow.startswith("$a") and getacc(irc, nick, True):
+                    if allow == "$a":
+                        return True
+                    else:
+                        allow = allow.lstrip("$a:")
+                        account = getacc(irc, nick, True)
+                        if irccmp(account, allow):
+                            return True
+                elif fnmatch(irclower(hostmask), irclower(allow)):
                     return True
         except KeyError:
             return False
     else:
         for allow in irc.allowed:
-            if fnmatch(irclower(hostmask), irclower(allow)):
+            if allow.startswith("$a") and getacc(irc, nick, True):
+                if allow == "$a":
+                    return True
+                else:
+                    allow = allow.lstrip("$a:")
+                    account = getacc(irc, nick, True)
+                    if irccmp(account, allow):
+                        return True
+            elif fnmatch(irclower(hostmask), irclower(allow)):
                 return True
     return False
 
@@ -176,9 +210,26 @@ def gethm(irc, nick, use_cache=False):
             user = irc.state["users"][nick]["user"]
             host = irc.state["users"][nick]["host"]
             hmask = irclib.NickMask.from_params(nick, user, host)
+            break
     if gotwho.is_set():
         gotwho.clear()
     return hmask
+
+def getacc(irc, nick, use_cache=False):
+    account = None
+    if not use_cache:
+        gotwho.clear()
+        irc.who(nick)
+        while not gotwho.is_set():
+            gotwho.wait()
+    for user in irc.state["users"].keys():
+        if irccmp(user, nick):
+            if irc.state["users"][user]["account"]:
+                account = irc.state["users"][user]["account"]
+                break
+    if gotwho.is_set():
+        gotwho.clear()
+    return account
 
 def ban_affects(irc, channel, bmask):
     affected = []
