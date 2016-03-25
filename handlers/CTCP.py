@@ -1,4 +1,4 @@
-from time import time
+import time
 
 def on_ctcp(irc, conn, event):
     nick = event.source.nick
@@ -14,7 +14,8 @@ def on_ctcp(irc, conn, event):
         irc.ctcp_reply(nick, "VERSION {}".format(irc.version))
 
     elif type == "PING":
+        now = int(time.time())
         if len(args.split()) > 1:
-            irc.ctcp_reply(nick, "PING {} {}".format(int(time()), args.split()[1]))
+            irc.ctcp_reply(nick, "PING {} {}".format(now, args.split()[1]))
         else:
-            irc.ctcp_reply(nick, "PING {}".format(int(time())))
+            irc.ctcp_reply(nick, "PING {}".format(now))
