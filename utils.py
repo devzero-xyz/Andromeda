@@ -129,7 +129,9 @@ def is_command(irc, conn, event):
             trigger = irc.channels[channel].get("trigger", irc.trigger)
         except KeyError:
             trigger = irc.trigger
-        if msg.startswith(trigger) or msg.startswith(irc.get_nick()):
+        if msg.startswith(trigger) and len(trigger) > 0:
+            return True
+        elif msg.startswith(irc.get_nick()):
             return True
     return False
 
@@ -143,7 +145,7 @@ def handle_command(irc, conn, event):
         trigger = irc.channels[channel].get("trigger", irc.trigger)
     except KeyError:
         trigger = irc.trigger
-    if msg.startswith(trigger):
+    if msg.startswith(trigger) and len(trigger) > 0:
         msg = msg.split()
         command = msg[0].replace(trigger, "", 1).lower()
         if len(msg) > 1:
