@@ -1,12 +1,9 @@
 #!/usr/bin/python3
-from fnmatch import fnmatch
 from time import sleep
 import irc.connection
 import irc.buffer
 import irc.client
-import traceback
 import threading
-import logging
 import thingdb
 import glob
 import imp
@@ -55,7 +52,7 @@ def reload_plugins(irc, init=False):
                         sys.exit(1)
             except BaseException as e:
                 log.error(e)
-                pass
+
             else:
                 if hasattr(pl, 'main'):
                     pl.main(irc)
@@ -97,10 +94,7 @@ class IRC(irc.client.SimpleIRCClient):
         reload_config(self)
         reload_handlers(init=True)
         reload_plugins(self, init=True)
-        if not self.sasl and not self.nickserv:
-            self.identified = True
-        else:
-            self.identified = False
+        self.identified = not self.sasl and not self.nickserv
         if self.bindaddr:
             self.bindaddr = (self.bindaddr, 0)
         if self.ssl:
@@ -118,7 +112,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.caps.append("sasl")
         log.info("Connecting to {}/{} as {}".format(self.server, str(self.port),
                                                     self.nick))
-        self.connect(self.server, self.port, self.nick,self.server_password, 
+        self.connect(self.server, self.port, self.nick,self.server_password,
                      self.ident, self.gecos, self.connect_factory, self.caps)
         self.connection.add_global_handler("all_events", self.on_all_events)
         self.fifo_thread = threading.Thread(target=self.fifo)
@@ -130,8 +124,6 @@ class IRC(irc.client.SimpleIRCClient):
         except KeyboardInterrupt:
             self.quit("Ctrl-C at console.")
             sys.exit(0)
-        except:
-            pass
 
     def reload_config(self):
         self.config = config.load(self.config_file)
@@ -223,7 +215,7 @@ class IRC(irc.client.SimpleIRCClient):
     def on_disconnect(self, conn, event):
         self.__init__()
 
-    def is_channel(self, channel):
+    def is_channel(channel):
         return irc.client.is_channel(channel)
 
     def is_opped(self, nick, channel):
@@ -251,11 +243,11 @@ class IRC(irc.client.SimpleIRCClient):
     def action(self, target, msg):
         self.connection.action(target, msg)
 
-    def ctcp(self, type, target, args=None):
+    def ctcp(self, ctcptype, target, args=None):
         if args:
-            self.connection.ctcp(type, target, args)
+            self.connection.ctcp(ctcptype, target, args)
         else:
-            self.connection.ctcp(type, target)
+            self.connection.ctcp(ctcptype, target)
 
     def ctcp_reply(self, target, args):
         self.connection.ctcp_reply(target, args)

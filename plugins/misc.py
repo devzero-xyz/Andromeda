@@ -4,8 +4,7 @@ name = "misc"
 cmds = ["list", "ping", "moo", "echo", "action", "help", "version",
         "hm", "bm"]
 
-@add_cmd
-def list(irc, event, args):
+def listcmd(irc, event, args):
     """[<plugin>]
 
     Lists plugins if no <plugin> is given, otherwise
@@ -19,6 +18,7 @@ def list(irc, event, args):
             irc.reply(event, "ERROR: No such plugin: {}".format(args[0]))
     else:
         irc.reply(event, ", ".join(sorted(plugins.keys())))
+add_cmd(listcmd, "list")
 
 @add_cmd
 def ping(irc, event, args):
@@ -54,8 +54,7 @@ def action(irc, event, args):
     if len(args) > 0:
         irc.reply(event, " ".join(args), action=True)
 
-@add_cmd
-def help(irc, event, args):
+def cmdhelp(irc, event, args):
     """[<command>]
 
     Returns help for <command>. Use the 'list' command
@@ -66,6 +65,7 @@ def help(irc, event, args):
         irc.reply(event, gethelp(cmd))
     else:
         irc.reply(event, gethelp("help"))
+add_cmd(cmdhelp, "help")
 
 @add_cmd
 def version(irc, event, args):

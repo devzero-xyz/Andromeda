@@ -3,8 +3,6 @@ from time import sleep
 import subprocess
 import random as rand
 import queue
-import code
-import sys
 
 from utils import *
 import utils
@@ -80,8 +78,7 @@ def nick(irc, event, args):
     if is_allowed(irc, event.source): # Checks if the user is on the global allowed list
         irc.chgnick(args[0]) # Calls the nickname change if the above function returns True
 
-@add_cmd
-def quit(irc, event, args):
+def botquit(irc, event, args):
     """[<message>]
 
     Makes the bot quit with <message> if given.
@@ -91,6 +88,7 @@ def quit(irc, event, args):
             irc.quit(" ".join(args))
         else:
             irc.quit(event.source.nick)
+add_cmd(botquit, "quit")
 
 @add_cmd
 def raw(irc, event, args):

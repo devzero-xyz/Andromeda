@@ -114,10 +114,7 @@ def is_allowed(irc, hostmask, channel=None):
     return False
 
 def is_hostmask(string):
-    if hmregex.match(string):
-        return True
-    else:
-        return False
+    return hmregex.match(string)
 
 def is_command(irc, conn, event):
     if is_private(event):
@@ -179,10 +176,7 @@ def handle_command(irc, conn, event):
         t.start()
 
 def is_private(event):
-    if event.type == "privmsg" or event.type == "privnotice":
-        return True
-    else:
-        return False
+    return event.type == "privmsg" or event.type == "privnotice":
 
 def irclower(string):
     string = str(string)
@@ -194,10 +188,7 @@ def irclower(string):
     return string
 
 def irccmp(str1, str2):
-    if irclower(str1) == irclower(str2):
-        return True
-    else:
-        return False
+    return irclower(str1) == irclower(str2):
 
 def gethm(irc, nick, use_cache=False):
     hmask = None
@@ -250,7 +241,6 @@ def banmask(irc, hostmask):
         hm = gethm(irc, hostmask)
         if not hm:
             return "{}!*@*".format(hostmask)
-    nick = hm.nick
     user = hm.user
     host = hm.host
     if host.startswith("gateway/"):
@@ -364,37 +354,37 @@ def gethelp(cmd):
         return "ERROR: No such command: {}".format(cmd)
 
 class console(code.InteractiveConsole):
-	def __init__(self, irc, utils, event):
-		code.InteractiveConsole.__init__(self, {
-			"irc": irc,
-			"utils": utils,
-			"event": event,
-			"globals": globals
-		})
-		self.out = ""
-		self.data = ""
+    def __init__(self, irc, utils, event):
+        code.InteractiveConsole.__init__(self, {
+            "irc": irc,
+            "utils": utils,
+            "event": event,
+            "globals": globals
+        })
+        self.out = ""
+        self.data = ""
 	
-	def write(self, data):
-		self.data += data
+    def write(self, data):
+        self.data += data
+
+    def commit(self, code):
+        self.lastout = self.out
+        msg = self.data
+        msg = msg.rstrip("\n")
+        self.out = ' | '.join(msg.splitlines())
+        self.lastcode = code
+        self.data = ""
 	
-	def commit(self, code):
-		self.lastout = self.out
-		msg = self.data
-		msg = msg.rstrip("\n")
-		self.out = ' | '.join(msg.splitlines())
-		self.lastcode = code
-		self.data = ""
+    def showtraceback(self):
+        err, msg, _ = sys.exc_info()
+        self.write("%s: %s"%(err.__name__, msg))
 	
-	def showtraceback(self):
-		err, msg, _ = sys.exc_info()
-		self.write("%s: %s"%(err.__name__, msg))
+    def showsyntaxerror(self, filename):
+        self.showtraceback()
 	
-	def showsyntaxerror(self, filename):
-		self.showtraceback()
-	
-	def run(self, code):
-		sys.stdout = self
-		v = self.push(code)
-		sys.stdout = sys.__stdout__
-		self.commit(code)
-		return v
+    def run(self, code):
+        sys.stdout = self
+        v = self.push(code)
+        sys.stdout = sys.__stdout__
+        self.commit(code)
+        return v

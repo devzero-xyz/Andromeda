@@ -1,6 +1,5 @@
 from time import sleep
 import signal
-import sys
 import os
 
 from utils import add_handler
