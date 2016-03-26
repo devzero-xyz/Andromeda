@@ -176,7 +176,7 @@ def handle_command(irc, conn, event):
         t.start()
 
 def is_private(event):
-    return event.type == "privmsg" or event.type == "privnotice":
+    return event.type == "privmsg" or event.type == "privnotice"
 
 def irclower(string):
     string = str(string)
