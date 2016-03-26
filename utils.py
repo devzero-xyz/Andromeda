@@ -30,22 +30,20 @@ def paste(payload):
 def add_cmd(func, name=None):
     if name is None:
         name = func.__name__
-
-    name = name
     commands[name] = func
 
 def add_hook(func, command):
     command = command.upper()
     command_hooks[command].append(func)
 
-def add_handler(func):
+def add_handler(func, plugin):
     name = func.__name__
     if not name.startswith("on_"):
         name = "on_"+name
-    if not name in handlers:
-        handlers[name] = []
-    handlers[name].append(func)
-
+    if not plugin in handlers:
+        handlers[plugin] = {}
+    handlers[plugin][name] = func
+    
 def is_owner(irc, hostmask, channel=None):
     hostmask = str(hostmask)
     nick = irclib.NickMask(hostmask).nick

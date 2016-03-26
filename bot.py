@@ -193,7 +193,12 @@ class IRC(irc.client.SimpleIRCClient):
                 func(self, conn, event)
 
             try:
-                funcs = utils.handlers["on_"+event.type]
+                funcs = []
+                for plugin in utils.handlers:
+                    try:
+                        funcs.append(utils.handlers[plugin]["on_"+event.type])
+                    except KeyError:
+                        continue
             except KeyError:
                 pass
             else:
@@ -216,7 +221,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.__init__()
 
     @staticmethod
-    def is_channel(self, channel):
+    def is_channel(channel):
         return irc.client.is_channel(channel)
 
     def is_opped(self, nick, channel):

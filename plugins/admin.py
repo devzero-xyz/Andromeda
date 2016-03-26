@@ -904,21 +904,20 @@ def getop(irc, channel):
     else:
         return True
 
-@add_handler
 def on_mode(irc, conn, event):
     if not name in irc.state["plugins"]:
-        irc.state["plugins"] = {}
+        irc.state["plugins"][name] = {}
     if irc.state["plugins"][name]["opped"]:
         channel = event.target
         modes = utils.split_modes(event.arguments)
         for mode in modes:
             if mode == "+o {}".format(irc.get_nick()):
                 irc.state["plugins"][name]["opped"].put_nowait(channel)
+add_handler(on_mode, name)
 
-@add_handler
 def on_privnotice(irc, conn, event):
     if not name in irc.state["plugins"]:
-        irc.state["plugins"] = {}
+        irc.state["plugins"][name] = {}
     nick = event.source.nick
     msg = event.arguments[0]
     if nick == "ChanServ" and irc.state["plugins"][name]["denied"]:
@@ -928,3 +927,4 @@ def on_privnotice(irc, conn, event):
         elif "is not registered" in msg:
             channel = msg.split("\x02")[1]
             irc.state["plugins"][name]["denied"].put(channel)
+add_handler(on_privnotice, name)
