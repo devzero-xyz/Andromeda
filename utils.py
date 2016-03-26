@@ -4,6 +4,8 @@ import irc.client as irclib
 import threading
 import requests
 import inspect
+import codecs
+import socket
 import code
 import sys
 import re
@@ -227,6 +229,29 @@ def getacc(irc, nick, use_cache=False):
     if gotwho.is_set():
         gotwho.clear()
     return account
+
+def getip(irc, hmask, use_cache=False):
+    ip = None
+    if not is_hostmask(hmask):
+        hmask = gethm(irc, hmask, use_cache)
+    hmask = irclib.NickMask(hmask)
+    user = hmask.user
+    host = hmask.host
+    if host.startswith("gateway/"):
+        if "/ip." in host:
+            ip = host.split("/ip.")[1]
+        elif host.endswith("/session"):
+            try:
+                hexip = codecs.decode(user, "hex")
+                ip = socket.inet_ntop(socket.AF_INET, hexip)
+            except (binascii.Error, ValueError):
+                pass
+    else:
+        try:
+            ip = socket.gethostbyname(host)
+        except socket.gaierror:
+            pass
+    return ip
 
 def ban_affects(irc, channel, bmask):
     affected = []
