@@ -378,7 +378,7 @@ class console(code.InteractiveConsole):
     def showtraceback(self):
         err, msg, _ = sys.exc_info()
         self.write("%s: %s"%(err.__name__, msg))
-	
+
     def showsyntaxerror(self, filename):
         self.showtraceback()
 	

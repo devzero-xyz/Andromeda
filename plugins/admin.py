@@ -440,7 +440,7 @@ def deop(irc, event, args):
 
     except IndexError:
         irc.reply(event, utils.gethelp("deop"))
-        
+
     else:
         if utils.is_allowed(irc, event.source, channel):
             already_op = irc.is_opped(irc.get_nick(), channel)
@@ -545,7 +545,7 @@ def ban(irc, event, args):
 
     Bans <nick> in <channel>. <channel> is only necessary if the command
     isn't sent in the channel itself.
-    """ 
+    """
     setmodes = []
     affected = []
     try:
