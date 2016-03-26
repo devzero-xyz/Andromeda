@@ -188,7 +188,7 @@ def irclower(string):
     return string
 
 def irccmp(str1, str2):
-    return irclower(str1) == irclower(str2):
+    return irclower(str1) == irclower(str2)
 
 def gethm(irc, nick, use_cache=False):
     hmask = None
