@@ -381,7 +381,7 @@ class console(code.InteractiveConsole):
 
     def showsyntaxerror(self, filename):
         self.showtraceback()
-	
+
     def run(self, code):
         sys.stdout = self
         v = self.push(code)

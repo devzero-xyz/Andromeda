@@ -455,7 +455,7 @@ def deop(irc, event, args):
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
-            
+
 @add_cmd
 def voice(irc, event, args):
     """[<channel>] [<nick>...]
@@ -768,7 +768,7 @@ def quiet(irc, event, args):
 
     Quiets <nick> in <channel>. <channel> is only necessary if the command
     isn't sent in the channel itself.
-    """ 
+    """
     setmodes = []
     affected = []
     try:
