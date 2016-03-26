@@ -459,7 +459,7 @@ def deop(irc, event, args):
 @add_cmd
 def voice(irc, event, args):
     """[<channel>] [<nick>...]
-    
+
     Voices <nick> (or yourself if no <nick> is specified) in <channel>.
     <channel> is only necessary if the command isn't sent in the channel
     itself.
