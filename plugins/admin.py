@@ -309,7 +309,7 @@ def squiet(irc, event, args):
 
     Quiets <nick> in <channel> using services. <channel> is only necessary
     if the command isn't sent in the channel itself.
-    """ 
+    """
     try:
         if utils.is_private(event):
             channel = args[0]
@@ -377,7 +377,7 @@ def sunquiet(irc, event, args):
 @add_cmd
 def op(irc, event, args):
     """[<channel>] [<nick>...]
-    
+
     Ops <nick> (or yourself if no <nick> is specified) in <channel>.
     <channel> is only necessary if the command isn't sent in the
     channel itself.

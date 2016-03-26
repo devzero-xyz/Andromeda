@@ -14,7 +14,7 @@ import os
 from log import log
 import config
 import utils
-    
+ 
 mtimes = {}
 
 def reload_handlers(init=False):
@@ -215,7 +215,8 @@ class IRC(irc.client.SimpleIRCClient):
     def on_disconnect(self, conn, event):
         self.__init__()
 
-    def is_channel(channel):
+    @staticmethod
+    def is_channel(self, channel):
         return irc.client.is_channel(channel)
 
     def is_opped(self, nick, channel):

@@ -363,7 +363,7 @@ class console(code.InteractiveConsole):
         })
         self.out = ""
         self.data = ""
-	
+
     def write(self, data):
         self.data += data
 
