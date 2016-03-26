@@ -270,7 +270,7 @@ class IRC(irc.client.SimpleIRCClient):
         if msg:
             self.connection.part(channel, msg)
         else:
-            self.connections.part(channel)
+            self.connection.part(channel)
 
     def send(self, line):
         self.connection.send_raw(line)
