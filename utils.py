@@ -374,7 +374,7 @@ class console(code.InteractiveConsole):
         self.out = ' | '.join(msg.splitlines())
         self.lastcode = code
         self.data = ""
-	
+
     def showtraceback(self):
         err, msg, _ = sys.exc_info()
         self.write("%s: %s"%(err.__name__, msg))

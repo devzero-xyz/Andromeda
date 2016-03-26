@@ -24,7 +24,7 @@ def on_mode(irc, conn, event):
             elif mode.startswith("+e"):
                 mask = mode.split()[1]
                 irc.state["channels"][channel]["excepts"].append(mask)
-            
+
             elif mode.startswith("-e"):
                 mask = mode.split()[1]
                 if mask in irc.state["channels"][channel]["excepts"]:
