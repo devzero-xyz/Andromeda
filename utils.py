@@ -121,10 +121,16 @@ def is_command(irc, conn, event):
         channel = event.target
         msg = event.arguments[0]
         try:
+            silence = irc.channels[channel].get("silence", irc.silence)
+        except KeyError:
+            silence = irc.silence
+        try:
             trigger = irc.channels[channel].get("trigger", irc.trigger)
         except KeyError:
             trigger = irc.trigger
-        if msg.startswith(trigger) and len(trigger) > 0:
+        if silence:
+            return False
+        elif msg.startswith(trigger) and len(trigger) > 0:
             return True
         elif msg.startswith(irc.get_nick()):
             return True

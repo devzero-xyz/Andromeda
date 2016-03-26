@@ -45,7 +45,7 @@ def reload_plugins(irc, init=False):
                 pl = imp.load_source(plugin, moduleinfo[1])
             except ImportError as e:
                 if str(e).startswith('No module named'):
-                    log.error("Failed to load plugin {}: the plugin could not be found.".fortmat(plugin))
+                    log.error("Failed to load plugin {}: the plugin could not be found.".format(plugin))
                 else:
                     log.error("Failed to load plugin {}: import error {}".format(plugin, str(e)))
                     if init:
@@ -143,6 +143,8 @@ class IRC(irc.client.SimpleIRCClient):
         self.autojoin = self.config.get("autojoin", True)
         self.autorejoin = self.config.get("autorejoin", False)
         self.chanserv = self.config.get("chanserv", False)
+        self.report = self.config.get("report", None)
+        self.silence = self.config.get("silence", False)
         self.channels = self.config.get("channels", {})
         self.owners = self.config.get("owners", [])
         self.allowed = self.config.get("allowed", [])
@@ -167,6 +169,8 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["autojoin"] = self.autojoin
         self.config["autorejoin"] = self.autorejoin
         self.config["chanserv"] = self.chanserv
+        self.config["report"] = self.report
+        self.config["silence"] = self.silence
         self.config["channels"] = self.channels
         self.config["owners"] = self.owners
         self.config["allowed"] = self.allowed
