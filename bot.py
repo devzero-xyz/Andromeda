@@ -101,6 +101,8 @@ class IRC(irc.client.SimpleIRCClient):
             self.identified = True
         else:
             self.identified = False
+        if self.bindaddr:
+            self.bindaddr = (self.bindaddr, 0)
         if self.ssl:
             self.connect_factory = irc.connection.Factory(
                                                     bind_address=self.bindaddr,
