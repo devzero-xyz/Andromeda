@@ -5,6 +5,7 @@ ircize
 fifo
 log
 src
+.c9
 .~*
 *.db
 *.pyc
