@@ -158,7 +158,10 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["port"] = self.port
         self.config["ident"] = self.ident
         self.config["realname"] = self.gecos
-        self.config["bindaddr"] = self.bindaddr
+        if self.bindaddr:
+            self.config["bindaddr"] = self.bindaddr[0]
+        else:
+            self.config["bindaddr"] = self.bindaddr
         self.config["ipv6"] = self.ipv6
         self.config["ssl"] = self.ssl
         self.config["sasl"] = self.sasl
