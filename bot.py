@@ -122,7 +122,7 @@ class IRC(irc.client.SimpleIRCClient):
         try:
             self.start()
         except KeyboardInterrupt:
-            self.quit("Ctrl-C at console.")
+            self.quit(self.quitmsg)
             sys.exit(0)
 
     def reload_config(self):
@@ -132,6 +132,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.port = self.config.get("port", 6667)
         self.ident = self.config.get("ident", self.nick)
         self.gecos = self.config.get("realname", self.version)
+        self.quitmsg = self.config.get("quitmsg", "Ctrl-C at console.")
         self.bindaddr = self.config.get("bindaddr", None)
         self.ipv6 = self.config.get("ipv6", False)
         self.ssl = self.config.get("ssl", False)
@@ -158,6 +159,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["port"] = self.port
         self.config["ident"] = self.ident
         self.config["realname"] = self.gecos
+        self.config["quitmsg"] = self.quitmsg
         if self.bindaddr:
             self.config["bindaddr"] = self.bindaddr[0]
         else:
