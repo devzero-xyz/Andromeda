@@ -160,7 +160,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["ident"] = self.ident
         self.config["realname"] = self.gecos
         self.config["quitmsg"] = self.quitmsg
-        if self.bindaddr:
+        if type(self.bindaddr) is tuple:
             self.config["bindaddr"] = self.bindaddr[0]
         else:
             self.config["bindaddr"] = self.bindaddr
