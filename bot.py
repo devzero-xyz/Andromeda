@@ -217,12 +217,12 @@ class IRC(irc.client.SimpleIRCClient):
     def on_nicknameinuse(self, conn, event):
         if not self.connected:
             log.error("Primary nick {} in use! Trying a fallback one.".format(self.nick))
-            self.nick(self.connection.get_nickname()+"_")
+            self.chgnick(self.get_nick()+"_")
 
     def on_unavailresource(self, conn, event):
         if not self.connected:
-            log.error("Primary nick is unavailable! Trying a fallback one.")
-            self.nick(self.connection.get_nickname()+"_")
+            log.error("Primary nick {} is unavailable! Trying a fallback one.".format(self.nick))
+            self.chgnick(self.get_nick()+"_")
 
     def on_disconnect(self, conn, event):
         self.__init__()
