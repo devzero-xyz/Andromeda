@@ -1,12 +1,15 @@
+from jaraco.functools import first_invoke
 from collections import defaultdict
 from fnmatch import fnmatch
 import irc.client as irclib
+import functools
 import threading
 import requests
 import inspect
 import codecs
 import socket
 import code
+import time
 import sys
 import re
 
@@ -417,3 +420,37 @@ class console(code.InteractiveConsole):
         sys.stdout = sys.__stdout__
         self.commit(code)
         return v
+
+# Modified version of Throttler in jaraco.functools
+class Throttler(object):
+	"""
+	Rate-limit a function (or other callable)
+	"""
+	def __init__(self, func, max_rate=float('Inf'), skip_for=0):
+		if isinstance(func, Throttler):
+			func = func.func
+		self.func = func
+		self.max_rate = max_rate
+		self.skip_for = skip_for
+		self.reset()
+
+	def reset(self):
+		self.last_called = 0
+
+	def __call__(self, *args, **kwargs):
+		self._wait()
+		return self.func(*args, **kwargs)
+
+	def _wait(self):
+		"ensure at least 1/max_rate seconds from last call"
+		elapsed = time.time() - self.last_called
+		if elapsed > self.max_rate:
+			self.called_times = 0
+		if self.called_times > self.skip_for:
+			must_wait = 1 / self.max_rate - elapsed
+			time.sleep(max(0, must_wait))
+		self.called_times += 1
+		self.last_called = time.time()
+
+	def __get__(self, obj, type=None):
+		return first_invoke(self._wait, functools.partial(self.func, obj))

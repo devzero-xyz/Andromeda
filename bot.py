@@ -119,6 +119,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.fifo_thread.daemon = True
         self.config_timer = threading.Timer(300, self.save_config)
         self.config_timer.daemon = True
+        self.set_rate_limit(self.throttle, self.burst)
         try:
             self.start()
         except KeyboardInterrupt:
@@ -152,6 +153,8 @@ class IRC(irc.client.SimpleIRCClient):
         self.trigger = self.config.get("trigger", "+")
         self.umodes = self.config.get("umodes", None)
         self.plugins = self.config.get("plugins", {})
+        self.throttle = self.config.get("throttle", 1)
+        self.burst = self.config.get("burst", 5)
 
     def save_config(self):
         self.config["server"] = self.server
@@ -182,9 +185,14 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["trigger"] = self.trigger
         self.config["umodes"] = self.umodes
         self.config["plugins"] = self.plugins
+        self.config["throttle"] = self.throttle
+        self.config["burst"] = self.burst
         config.save(self.config_file, self.config)
         thingdb.save(self.state, "state.db")
         log.info("Config saved to file.")
+
+    def set_rate_limit(self, frequency, skip_for=0):
+        self.connection.send_raw = utils.Throttler(self.connection.send_raw, frequency, skip_for)
 
     def get_nick(self):
         return self.connection.get_nickname()
