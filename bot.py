@@ -243,7 +243,8 @@ class IRC(irc.client.SimpleIRCClient):
             self.chgnick(self.get_nick()+"_")
 
     def on_disconnect(self, conn, event):
-        self.__init__()
+        self.connected = False
+        self.restart()
 
     @staticmethod
     def is_channel(channel):
@@ -357,6 +358,13 @@ class IRC(irc.client.SimpleIRCClient):
         else:
             self.connection.quit()
         self.save_config()
+
+    def restart(self):
+        if self.connected:
+            self.quit("Restarting.")
+        else:
+            self.save_config()
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def who(self, target):
         if "extended-join" in self.state["server"]["caps"]:
