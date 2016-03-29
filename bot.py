@@ -6,6 +6,7 @@ import irc.client
 import threading
 import thingdb
 import glob
+import time
 import imp
 import ssl
 import sys
@@ -119,12 +120,19 @@ class IRC(irc.client.SimpleIRCClient):
         self.fifo_thread.daemon = True
         self.config_timer = threading.Timer(300, self.save_config)
         self.config_timer.daemon = True
+        self.pingfreq = 30
+        self.timeout = self.pingfreq * 2
+        self.lastping = time.time()
+        self.ping_timer = threading.Timer(self.pingfreq, self.ping)
+        self.ping_timer.daemon = True
         self.set_rate_limit(self.throttle, self.burst)
         try:
             self.start()
         except KeyboardInterrupt:
             self.quit(self.quitmsg)
             sys.exit(0)
+        except ValueError:
+            pass
 
     def reload_config(self):
         self.config = config.load(self.config_file)
@@ -286,6 +294,14 @@ class IRC(irc.client.SimpleIRCClient):
             self.connection.part(channel, msg)
         else:
             self.connection.part(channel)
+
+    def ping(self):
+        now = time.time()
+        diff = now - self.lastping
+        if diff > self.timeout:
+            self.quit("Lag detected: {} seconds".format(diff))
+        else:
+            self.send("PING :{}".format(now))
 
     def send(self, line):
         self.connection.send_raw(line)
