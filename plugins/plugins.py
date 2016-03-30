@@ -40,7 +40,7 @@ def updates(irc, event, args):
                 if active_plugin + ".py" == plugin:
                     with open("plugins/" + active_plugin + ".py", "r") as deltax:
                         if deltax.read() != requests.get(plugin_sources[plugin_source_url][plugin]).text:
-                            updates.append()
+                            updates.append(plugin)
                         deltax.close()
     if updates:
         irc.reply(event, "The follwing plugin(s) can be updated: {}".format(" ".join(updates)))
