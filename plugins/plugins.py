@@ -52,7 +52,7 @@ def available(irc, event, args):
     available_plugins = []
     for plugin_source_url in plugin_sources:
         for plugin in plugin_sources[plugin_source_url]:
-            if plugin not in active_plugins:
+            if plugin + ".py" not in active_plugins:
                 available_plugins.append(plugin)
     if available_plugins:
         irc.reply(event, "The follwing plugin(s) can be installed: {}".format(" ".join(available_plugins)))
