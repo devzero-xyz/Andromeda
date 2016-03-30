@@ -83,18 +83,18 @@ def update(irc, event, args):
             for plugin_source_url in plugin_sources:
                 for plugin_name in plugin_sources[plugin_source_url]:
                     if args[0] + ".py" == plugin_name:
-                        success = True
                         with open("plugins/" + args[0] + ".py", "r") as plugin_to_read:
                             try:
                                 deltax = requests.get(plugin_sources[plugin_source_url][plugin_name]).text
                             except:
                                 irc.reply(event, "The plugin couldn't be found online")
                             if plugin_to_read.read() != deltax:
-                                plugin_plugin_to_read.close()
+                                plugin_to_read.close()
                                 with open("plugins/" + args[0] + ".py", "w") as plugin_to_write:
                                     irc.reply(event, "Updating plugin: {}".format(args[0]))
                                     plugin_to_write.write(deltax)
                                     plugin_to_write.close()
+                                    success = True
                                     irc.reply(event, "Plugin updated successfully")
                             else:
                                 irc.reply(event, "That plugin is at its latest version")
