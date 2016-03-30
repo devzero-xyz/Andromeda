@@ -91,7 +91,7 @@ def update(irc, event, args):
                                 irc.reply(event, "The plugin couldn't be found online")
                             if plugin_to_read.read() != deltax:
                                 plugin_plugin_to_read.close()
-                                with open("plugins/" + args[0] + ".py", "r") as plugin_to_write:
+                                with open("plugins/" + args[0] + ".py", "w") as plugin_to_write:
                                     irc.reply(event, "Updating plugin: {}".format(args[0]))
                                     plugin_to_write.write(deltax)
                                     plugin_to_write.close()
