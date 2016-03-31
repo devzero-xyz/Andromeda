@@ -80,9 +80,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config_file = config_file
         self.conf_mtime = None
         self.connected = False
-        if not os.path.exists("state.db"):
-            thingdb.save({}, "state.db")
-        self.state = thingdb.start("state.db")
+        self.state = thingdb.thing("state.db")
         if "server" not in self.state:
             self.state["server"] = {}
         if "channels" not in self.state:
@@ -196,7 +194,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["throttle"] = self.throttle
         self.config["burst"] = self.burst
         config.save(self.config_file, self.config)
-        thingdb.save(self.state, "state.db")
+        self.state.save()
         log.info("Config saved to file.")
 
     def set_rate_limit(self, frequency, skip_for=0):
