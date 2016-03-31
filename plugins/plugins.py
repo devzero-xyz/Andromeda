@@ -13,7 +13,7 @@ plugin_sources = {
 }
 
 name = "plugins"
-cmds = ["update", "available", "updates"] # Install <plugin>, uninstall <plugin> <<< TODO
+cmds = ["update", "available", "updates", "install"] # Install <plugin>, uninstall <plugin> <<< TODO
 
 update_refresh_rate = 5 # Seconds | Recommended for minimal RAM use (300) 5 mins
 installed_plugins = os.listdir("plugins")
@@ -110,10 +110,11 @@ def update(irc, event, args):
     except KeyError:
         pass
 
+@add_cmd
 def install(irc, event, args):
     """<plugin>
 
-    Installes <plugin> if plugin is found online and is not already installed
+    Installs <plugin> if plugin is found online and is not already installed
     """
     plugin_sources = check()
     success = False
