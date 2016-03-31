@@ -5,6 +5,7 @@ import re
 import utils
 import os
 import requests
+import bs4
 
 plugin_sources = {
     "https://github.com/devzero-xyz/Andromeda/tree/master/plugins": {}, # wil contain plugin names and raw url
@@ -21,16 +22,14 @@ active_plugins = [plugin.replace(".py", "") for plugin in utils.plugins.keys()]
 
 def check():
     for get_plugin in plugin_sources:
-        plugin_page = [x + ".py" for x in re.findall('(?:plugins|master)/(.*?).py',requests.get(get_plugin).text)]
-        for plugin_name in plugin_page:
-            find_url = get_plugin.replace("github", "raw.githubusercontent").replace("/tree", "") + "/" + plugin_name
-            if not " " in plugin_name and not "?" in plugin_name and not "\"" in plugin_name:
-                plugin_sources[get_plugin][plugin_name.replace("blob/master/", "").replace("plugins/", "")] = find_url
+        soup = bs4.BeautifulSoup(requests.get(get_plugin).text)
+        soup = [x.get('href') for x in soup.find_all('a') if x.get('href').endswith(".py")]
+        for plugin_url in soup:
+            plugin_name = plugin_url.split('/')[-1]
+            find_url = "http://raw.githubusercontent.com" + plugin_url.replace("blob/", "")
+            plugin_sources[get_plugin][plugin_name] = find_url
     print (plugin_sources)
     return plugin_sources
-#update_thread = Thread(target=check)
-#update_thread.setDaemon(True)
-#update_thread.start()
 
 @add_cmd
 def updates(irc, event, args):
@@ -38,13 +37,12 @@ def updates(irc, event, args):
 
     Checks for plugins that can be updated.
     """
-    #irc.reply(event, check())
     plugin_sources = check()
     updates = []
-    #irc.reply(event, plugin_sources)
     for plugin_source_url in plugin_sources:
         for plugin_name in plugin_sources[plugin_source_url]:
             for active_plugin in os.listdir("plugins"):
+                #irc.privmsg("BWBellairs", plugin_sources[plugin_source_url][plugin_name])
                 if active_plugin == plugin_name:
                     with open("plugins/" + active_plugin, "r") as deltax:
                         if deltax.read() != requests.get(plugin_sources[plugin_source_url][plugin_name]).text:
@@ -72,7 +70,7 @@ def available(irc, event, args):
     else:
         irc.reply(event, "You have all the plugins installed given the {} urls in this plugin: plugins.py".format(len(plugin_sources)))
 
-@add_cmd
+
 def update(irc, event, args):
     """<plugin>
 
@@ -130,13 +128,11 @@ def install(irc, event, args):
                                 plugin_to_write.write(deltax)
                                 plugin_to_write.close()
                                 success = True
+                                irc.reply(event, "Plugin successfully installed")
                         except:
                             irc.reply(event, "The plugin couldn't be found online")
         elif args[0] + ".py" in os.listdir("plugins"):
             irc.reply(event, "That plugin is already installed")
-        
-        if not success:
-            irc.reply("That plugin couldn't be installed")
         
     except KeyError:
         pass
