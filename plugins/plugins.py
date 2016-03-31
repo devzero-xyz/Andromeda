@@ -39,7 +39,7 @@ def updates(irc, event, args):
     """
     plugin_sources = check()
     updates = []
-    if irc.is_owner(irc, event.source):
+    if utils.is_owner(irc, event.source):
         for plugin_source_url in plugin_sources:
             for plugin_name in plugin_sources[plugin_source_url]:
                 for active_plugin in os.listdir("plugins"):

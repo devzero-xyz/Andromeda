@@ -304,7 +304,7 @@ def banmask(irc, hostmask):
         bm = "*!*@{}".format(host)
         return bm
     else:
-        bm = "*!{}@{}".join(user, host)
+        bm = "*!{}@{}".format(user, host)
         return bm
 
 def split_modes(modes):
