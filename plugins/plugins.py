@@ -140,15 +140,18 @@ def install(irc, event, args):
 @add_cmd
 def uninstall(irc, event, args):
     plugin_sources = check()
-    for plugin_source_url in plugin_sources:
-        for plugin in plugin_sources[plugin_source_url]:
-            if plugin in os.listdir("plugins"):
-                try:
-                    irc.reply(event, "Uninstalling plugin")
-                    os.remove("plugins/" + plugin)
-                    del(utils.plugins[plugin.replace(".py", "")])
-                    irc.reply(event, "Plugin successfully uninstalled")
-                except:
-                    irc.reply(event, "That plugin cannot be uninstalled")
-            elif plugin not in os.listdir("plugins"):
-                irc.reply(event, "That plugin isn't installed")
+    try:
+        for plugin_source_url in plugin_sources:
+            for plugin in plugin_sources[plugin_source_url]:
+                if plugin in os.listdir("plugins") and args[0] == plugin.replace(".py", ""):
+                    try:
+                        irc.reply(event, "Uninstalling plugin")
+                        os.remove("plugins/" + plugin)
+                        del(utils.plugins[plugin.replace(".py", "")])
+                        irc.reply(event, "Plugin successfully uninstalled")
+                    except:
+                        irc.reply(event, "That plugin cannot be uninstalled")
+                elif plugin not in os.listdir("plugins"):
+                    irc.reply(event, "That plugin isn't installed")
+    except KeyError:
+        pass
