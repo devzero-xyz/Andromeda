@@ -9,6 +9,7 @@ import requests
 plugin_sources = {
     "https://github.com/devzero-xyz/Andromeda/tree/master/plugins": {}, # wil contain plugin names and raw url
     "https://github.com/devzero-xyz/Andromeda-Plugins": {},
+    "https://github.com/IndigoTiger/Andromeda-plugins": {},
 }
 
 name = "plugins"
@@ -20,10 +21,11 @@ active_plugins = [plugin.replace(".py", "") for plugin in utils.plugins.keys()]
 
 def check():
     for get_plugin in plugin_sources:
-        plugin_page = [x + ".py" for x in re.findall('plugins/(.*?).py',requests.get(get_plugin).text)]
+        plugin_page = [x + ".py" for x in re.findall('(?:plugins|master)/(.*?).py',requests.get(get_plugin).text)]
         for plugin_name in plugin_page:
             find_url = get_plugin.replace("github", "raw.githubusercontent").replace("/tree", "") + "/" + plugin_name
-            plugin_sources[get_plugin][plugin_name.replace("plugins/", "")] = find_url
+            if not " " in plugin_name and not "?" in plugin_name and not "\"" in plugin_name:
+                plugin_sources[get_plugin][plugin_name.replace("blob/master/", "").replace("plugins/", "")] = find_url
     print (plugin_sources)
     return plugin_sources
 #update_thread = Thread(target=check)
@@ -64,9 +66,9 @@ def available(irc, event, args):
     for plugin_source_url in plugin_sources:
         for plugin in plugin_sources[plugin_source_url]:
             if plugin not in os.listdir("plugins"):
-                available_plugins.append(plugin.replace("plugins/",""))
+                available_plugins.append(plugin.replace("plugins/","").replace(".py", ""))
     if available_plugins:
-        irc.reply(event, "The follwing plugin(s) can be installed: {}".format(" ".join(available_plugins)))
+        irc.reply(event, "The follwing plugin(s) can be installed: {}".format(" | ".join(available_plugins)))
     else:
         irc.reply(event, "You have all the plugins installed given the {} urls in this plugin: plugins.py".format(len(plugin_sources)))
 
@@ -101,6 +103,36 @@ def update(irc, event, args):
             
         elif args[0] + ".py" not in os.listdir("plugins"):
             irc.reply(event, "That plugin isn't installed")
+        
+        if not success:
+            irc.reply("That plugin couldn't be installed")
+        
+    except KeyError:
+        pass
+
+def install(irc, event, args):
+    """<plugin>
+
+    Installes <plugin> if plugin is found online and is not already installed
+    """
+    plugin_sources = check()
+    success = False
+    try:
+        if args[0] + ".py" not in os.listdir("plugins"):
+            for plugin_source_url in plugin_sources:
+                for plugin_name in plugin_sources[plugin_source_url]:
+                    if args[0] + ".py" == plugin_name:
+                        try:
+                            deltax = requests.get(plugin_sources[plugin_source_url][plugin_name]).text
+                            with open("plugins/" + args[0] + ".py", "w") as plugin_to_write:
+                                irc.reply(event, "Installing plugin: {}".format(args[0]))
+                                plugin_to_write.write(deltax)
+                                plugin_to_write.close()
+                                success = True
+                        except:
+                            irc.reply(event, "The plugin couldn't be found online")
+        elif args[0] + ".py" in os.listdir("plugins"):
+            irc.reply(event, "That plugin is already installed")
         
         if not success:
             irc.reply("That plugin couldn't be installed")
