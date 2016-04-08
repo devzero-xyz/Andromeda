@@ -161,6 +161,8 @@ class IRC(irc.client.SimpleIRCClient):
         self.plugins = self.config.get("plugins", {})
         self.throttle = self.config.get("throttle", 1)
         self.burst = self.config.get("burst", 5)
+        self.aliases = self.config.get("aliases", {})
+        self.factoids = self.config.get("factoids", {})
 
     def save_config(self):
         self.config["server"] = self.server
