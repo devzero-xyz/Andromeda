@@ -26,7 +26,7 @@ hmregex = re.compile("\S+!\S+@\S+")
 gotwho = threading.Event()
 
 def paste(payload):
-    pastebin = "http://hastebin.com/"
+    pastebin = "https://paste.indigotiger.me/"
     url = pastebin+"documents"
     response = requests.post(url, data=payload)
     if response.status_code == 200:
@@ -149,8 +149,18 @@ def handle_command(irc, conn, event):
         channel = event.source.nick
     try:
         trigger = irc.channels[channel].get("trigger", irc.trigger)
+        aliases = irc.channels[channel].get("aliases", irc.aliases)
+        factoids = irc.channels[channel].get("factoids", irc.factoids)
     except KeyError:
         trigger = irc.trigger
+        aliases = irc.aliases
+        factoids = irc.factoids
+    for alias in irc.aliases:
+        if alias not in aliases:
+            aliases[alias] = irc.aliases[alias]
+    for factoid in irc.factoids:
+        if factoid not in factoids:
+            factoids[factoid] = irc.factoids[factoid]
     if msg.startswith(trigger) and len(trigger) > 0:
         msg = msg.split()
         command = msg[0].replace(trigger, "", 1).lower()
@@ -173,6 +183,30 @@ def handle_command(irc, conn, event):
         else:
             args = []
     try:
+        if command in aliases:
+            alias = aliases[command].split()
+            command = alias[0].lower()
+            if len(alias) > 1:
+                origargs = args
+                args = alias[1:]
+                if args:
+                    try:
+                        args = [arg
+                        .replace("%n", event.source.nick)
+                        .replace("%cc", event.target)
+                        .replace("%h", irc.state["users"][event.source.nick]["host"])
+                        .replace("%a", irc.state["users"][event.source.nick]["account"])
+                        .replace("%u", irc.state["users"][event.source.nick]["user"])
+                        .replace("%g", irc.state["users"][event.source.nick]["gecos"])
+                        .replace("%cs", " ".join(irc.state["users"][event.source.nick]["channels"]))
+                        for arg  in args]
+                    except:
+                        pass # User can't be found
+                for arg in origargs:
+                    args.append(arg)
+        elif command in factoids:
+            irc.reply(event, factoids[command])
+            return
         func = commands[command]
 
     except KeyError:
