@@ -37,8 +37,11 @@ def alias(irc, event, args):
                         if alias != alias.lower():
                             irc.reply(event, "The alias name has to be lowercase. Changing alias name...")
                             alias = alias.lower()
-                        irc.channels[channel]["aliases"][alias] = command
-                        irc.reply(event, "Alias \"{}\" with arguments \"{}\" added for command \"{}\" in \"{}\"".format(alias, " ".join(command.split()[1:]), command.split()[0], channel))
+                        if alias in utils.commands:
+                            irc.reply(event, "Alias \"{}\" is a command and cannot be overwritten".format(alias))
+                        else:    
+                            irc.channels[channel]["aliases"][alias] = command
+                            irc.reply(event, "Alias \"{}\" with arguments \"{}\" added for command \"{}\" in \"{}\"".format(alias, " ".join(command.split()[1:]), command.split()[0], channel))
                     elif command.split()[0] in utils.commands and alias not in utils.commands:
                         if "aliases" not in irc.channels[channel]:
                             irc.channels[channel]["aliases"] = {}
