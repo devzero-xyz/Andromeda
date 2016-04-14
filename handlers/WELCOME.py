@@ -1,8 +1,6 @@
 def on_welcome(irc, conn, event):
     irc.connected = True
     irc.fifo_thread.start()
-    irc.config_timer.start()
-    irc.ping_timer.start()
     if irc.umodes:
         irc.mode(irc.get_nick(), irc.umodes)
     if irc.sasl or irc.identified:

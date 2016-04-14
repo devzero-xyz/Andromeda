@@ -116,13 +116,11 @@ class IRC(irc.client.SimpleIRCClient):
         self.connection.add_global_handler("all_events", self.on_all_events)
         self.fifo_thread = threading.Thread(target=self.fifo)
         self.fifo_thread.daemon = True
-        self.config_timer = threading.Timer(300, self.save_config)
-        self.config_timer.daemon = True
+        self.reactor.execute_every(300, self.save_config)
         self.pingfreq = 30
         self.timeout = self.pingfreq * 2
         self.lastping = time.time()
-        self.ping_timer = threading.Timer(self.pingfreq, self.ping)
-        self.ping_timer.daemon = True
+        self.reactor.execute_every(self.pingfreq, self.ping)
         self.set_rate_limit(self.throttle, self.burst)
         try:
             self.start()
