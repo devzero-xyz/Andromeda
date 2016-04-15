@@ -129,6 +129,8 @@ class IRC(irc.client.SimpleIRCClient):
             sys.exit(0)
         except ValueError:
             pass
+        except irc.client.ServerConnectionError:
+            self.restart()
 
     def reload_config(self):
         self.config = config.load(self.config_file)
