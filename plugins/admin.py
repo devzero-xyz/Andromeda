@@ -116,7 +116,7 @@ def _shell(irc, event, args):
     Executes <command> on the shell.
     """
     if is_owner(irc, event.source):
-        args = " ".join(args).replace("ls", "ls -C")
+        args = " ".join(args)
         try:
             s = subprocess.check_output(args+" | ./ircize --remove", stderr=subprocess.STDOUT, shell=True)
             if s:
