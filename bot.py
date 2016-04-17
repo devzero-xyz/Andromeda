@@ -302,6 +302,7 @@ class IRC(irc.client.SimpleIRCClient):
         if diff > self.timeout:
             log.warn("Lagging by {} seconds! Disconnecting.".format(int(diff)))
             self.quit("No Ping reply in {} seconds.".format(int(diff)))
+            self.restart()
         else:
             self.send("PING :{}".format(now))
 
