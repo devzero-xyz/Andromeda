@@ -403,6 +403,8 @@ def op(irc, event, args):
     else:
         if utils.is_allowed(irc, event.source, channel):
             already_op = irc.is_opped(irc.get_nick(), channel)
+            if "*" in nicks:
+                nicks = irc.state["channels"][channel]["names"]
             for nick in nicks:
                 if not irc.is_opped(nick, channel):
                     setmodes.append("+o {}".format(nick))
@@ -444,6 +446,8 @@ def deop(irc, event, args):
     else:
         if utils.is_allowed(irc, event.source, channel):
             already_op = irc.is_opped(irc.get_nick(), channel)
+            if "*" in nicks:
+                nicks = irc.state["channels"][channel]["names"]
             for nick in nicks:
                 if irc.is_opped(nick, channel):
                     setmodes.append("-o {}".format(nick))
@@ -486,6 +490,8 @@ def voice(irc, event, args):
     else:
         if utils.is_allowed(irc, event.source, channel):
             already_op = irc.is_opped(irc.get_nick(), channel)
+            if "*" in nicks:
+                nicks = irc.state["channels"][channel]["names"]
             for nick in nicks:
                 if not irc.is_voiced(nick, channel):
                     setmodes.append("+v {}".format(nick))
@@ -527,6 +533,8 @@ def devoice(irc, event, args):
     else:
         if utils.is_allowed(irc, event.source, channel):
             already_op = irc.is_opped(irc.get_nick(), channel)
+            if "*" in nicks:
+                nicks = irc.state["channels"][channel]["names"]
             for nick in nicks:
                 if irc.is_voiced(nick, channel):
                     setmodes.append("-v {}".format(nick))
