@@ -168,12 +168,16 @@ def handle_command(irc, conn, event):
             args = msg[1:]
         else:
             args = []
-    elif msg.startswith(irc.get_nick()):
+    elif msg.split()[0].replace(":", "").replace(",", "") == irc.get_nick():
         msg = msg.split()
-        command = msg[1].lower()
-        if len(msg) > 2:
-            args = msg[2:]
+        if len(msg) > 1:
+            command = msg[1].lower()
+            if len(msg) > 2:
+                args = msg[2:]
+            else:
+                args = []
         else:
+            command = ""
             args = []
     else:
         msg = msg.split()
