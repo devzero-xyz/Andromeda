@@ -580,7 +580,7 @@ def ban(irc, event, args):
                     bmask = utils.banmask(irc, nick)
                 setmodes.append("+b {}".format(bmask))
                 for affect in utils.ban_affects(irc, channel, bmask):
-                    if not affect in affected:
+                    if affect not in affected and affect != irc.get_nick():
                         affected.append(affect)
             for nick in affected:
                 if irc.is_opped(nick, channel):
@@ -647,7 +647,7 @@ def kban(irc, event, args):
                     bmask = utils.banmask(irc, nick)
                 setmodes.append("+b {}".format(bmask))
                 for affect in utils.ban_affects(irc, channel, bmask):
-                    if affect not in affected:
+                    if affect not in affected and affect != irc.get_nick():
                         if irc.is_opped(irc, affect, channel):
                             setmodes.append("-o {}".format(affect))
                         if irc.is_voiced(irc, affect, channel):
@@ -807,7 +807,7 @@ def quiet(irc, event, args):
                     bmask = utils.banmask(irc, nick)
                 setmodes.append("+q {}".format(bmask))
                 for affect in utils.ban_affects(irc, channel, bmask):
-                    if not affect in affected:
+                    if affect not in affected and affect != irc.get_nick():
                         affected.append(affect)
             for nick in affected:
                 if irc.is_opped(nick, channel):
@@ -921,6 +921,8 @@ def on_mode(irc, conn, event):
     modes = utils.split_modes(event.arguments)
     for mode in modes:
         if mode.startswith("+b"):
+            if event.source.nick == irc.get_nick():
+                continue
             mask = mode.split()[1]
             affects = utils.ban_affects(irc, channel, mask)
             names = irc.state["channels"][channel]["names"]
@@ -932,6 +934,8 @@ def on_mode(irc, conn, event):
                 for nick in baffects:
                     if irc.is_opped(nick, channel):
                         setmodes.append("-o {}".format(nick))
+                    if irc.is_voiced(nick, channel):
+                        setmodes.append("-v {}".format(nick))
                 setmodes.append("+b {}".format(bmask))
                 already_op = irc.is_opped(irc.get_nick(), channel)
                 gotop = getop(irc, channel)
