@@ -913,11 +913,34 @@ def getop(irc, channel):
         return True
 
 def on_mode(irc, conn, event):
+    channel = event.target
+    modes = utils.split_modes(event.arguments)
+    for mode in modes:
+        if mode.startswith("+b"):
+            mask = mode.split()[1]
+            affects = utils.ban_affects(irc, channel, mask)
+            names = irc.state["channels"][channel]["names"]
+            if len(affects) >= len(names) / 2:
+                setmodes = []
+                bmask = utils.banmask(irc, event.source)
+                setmodes.append("-b {}".format(mask))
+                baffects = utils.ban_affects(irc, channel, bmask)
+                for nick in baffects:
+                    if irc.is_opped(nick, channel):
+                        setmodes.append("-o {}".format(nick))
+                setmodes.append("+b {}".format(bmask))
+                already_op = irc.is_opped(irc.get_nick(), channel)
+                gotop = getop(irc, channel)
+                if gotop:
+                    for modes in utils.unsplit_modes(setmodes):
+                        irc.mode(channel, modes)
+                    for nick in baffects:
+                        irc.kick(channel, nick)
+                    if not already_op:
+                        irc.mode(channel, "-o {}".format(irc.get_nick()))
     if not name in irc.state["plugins"]:
         irc.state["plugins"][name] = {}
     if irc.state["plugins"][name]["opped"]:
-        channel = event.target
-        modes = utils.split_modes(event.arguments)
         for mode in modes:
             if mode == "+o {}".format(irc.get_nick()):
                 irc.state["plugins"][name]["opped"].put_nowait(channel)

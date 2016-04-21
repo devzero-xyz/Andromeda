@@ -137,8 +137,9 @@ def is_command(irc, conn, event):
             return False
         elif msg.startswith(trigger) and len(trigger) > 0:
             return True
-        elif msg.split()[0].rstrip(":,") == irc.get_nick():
-            return True
+        elif len(msg.split()) > 0:
+            if msg.split()[0].rstrip(":,") == irc.get_nick():
+                return True
     return False
 
 def handle_command(irc, conn, event):
