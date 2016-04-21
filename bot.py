@@ -209,6 +209,7 @@ class IRC(irc.client.SimpleIRCClient):
         reload_config(self)
         reload_handlers()
         reload_plugins(self)
+        self.lastping = time.time()
         if event.type != "all_raw_messages":
             try:
                 func = globals()['on_'+event.type]
