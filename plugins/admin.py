@@ -647,7 +647,11 @@ def kban(irc, event, args):
                     bmask = utils.banmask(irc, nick)
                 setmodes.append("+b {}".format(bmask))
                 for affect in utils.ban_affects(irc, channel, bmask):
-                    if not affect in affected:
+                    if affect not in affected:
+                        if irc.is_opped(irc, affect, channel):
+                            setmodes.append("-o {}".format(affect))
+                        if irc.is_voiced(irc, affect, channel):
+                            setmodes.append("-v {}".format(affect))
                         affected.append(affect)
             if len(setmodes) == 0:
                 return
