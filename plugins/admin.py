@@ -890,7 +890,13 @@ def mode(irc, event, args):
     """
     try:
         if utils.is_private(event) or irc.is_channel(args[0]):
-            channel = args[0]
+            if args[0] in irc.state["channels"]:
+                channel = args[0]
+            elif not utils.is_private(event):
+                channel = event.target
+            else:
+                irc.reply(event, utils.gethelp("mode"))
+                return
             setmodes = utils.split_modes(args[1:])
         else:
             channel = event.target
