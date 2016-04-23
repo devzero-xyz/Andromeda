@@ -11,7 +11,7 @@ name = "admin"
 cmds = ["join", "part", "nick", "quit", "raw", ">>", ">", "op", "deop",
         "voice", "devoice", "ban", "kban", "unban", "sop", "sdeop",
         "svoice", "sdevoice", "squiet", "sunquiet", "kick", "quiet",
-        "unquiet"]
+        "unquiet", "mode"]
 
 def main(irc):
     if not name in irc.plugins:
@@ -891,10 +891,10 @@ def mode(irc, event, args):
     try:
         if utils.is_private(event) or irc.is_channel(args[0]):
             channel = args[0]
-            setmodes = utils.split_modes(" ".join(args[1:]))
+            setmodes = utils.split_modes(args[1:])
         else:
             channel = event.target
-            setmodes = utils.split_modes(" ".join(args))
+            setmodes = utils.split_modes(args)
 
     except IndexError:
         irc.reply(event, utils.gethelp("mode"))
