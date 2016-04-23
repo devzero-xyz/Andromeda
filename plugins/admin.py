@@ -897,7 +897,7 @@ def mode(irc, event, args):
             setmodes = utils.split_modes(" ".join(args))
 
     except IndexError:
-        irc.reply(event, utils.gethelp("mode")
+        irc.reply(event, utils.gethelp("mode"))
 
     else:
         if utils.is_allowed(irc, event.source, channel):
