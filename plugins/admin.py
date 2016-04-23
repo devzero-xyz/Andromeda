@@ -882,6 +882,34 @@ def unquiet(irc, event, args):
                     irc.mode(channel, mode)
 
 @add_cmd
+def mode(irc, event, args):
+    """[<channel>] <modes>
+
+    Sets <modes> in <channel>. <channel> is only necessary if the command
+    isn't sent in the channel itself.
+    """
+    try:
+        if utils.is_private(event) or irc.is_channel(args[0]):
+            channel = args[0]
+            setmodes = utils.split_modes(" ".join(args[1:]))
+        else:
+            channel = event.target
+            setmodes = utils.split_modes(" ".join(args))
+
+    except IndexError:
+        irc.reply(event, utils.gethelp("mode")
+
+    else:
+        if utils.is_allowed(irc, event.source, channel):
+            already_op = irc.is_opped(irc.get_nick(), channel)
+            if not already_op:
+                setmodes.append("-o {}".format(irc.get_nick()))
+            gotop = getop(irc, channel)
+            if gotop:
+                for modes in utils.unsplit_modes(setmodes):
+                    irc.mode(channel, modes)
+
+@add_cmd
 def random(irc, event, args): # I'll delete this after
     """takes no arguments
 
