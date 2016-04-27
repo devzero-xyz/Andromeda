@@ -8,6 +8,7 @@ import requests
 import inspect
 import codecs
 import socket
+import queue
 import code
 import time
 import sys
@@ -24,6 +25,7 @@ command_hooks = defaultdict(list)
 argmodes = {"set": "bqeIkfljov", "unset": "bqeIkov"}
 hmregex = re.compile("\S+!\S+@\S+")
 gotwho = threading.Event()
+denied = None
 
 def paste(payload):
     pastebin = "https://paste.indigotiger.me/"
@@ -423,6 +425,26 @@ def gethelp(cmd):
             return "No help found for: {}".format(cmd)
     except (NameError, KeyError):
         return "ERROR: No such command: {}".format(cmd)
+
+def getop(irc, channel):
+    if not irc.is_opped(irc.get_nick(), channel):
+        if not irc.channels[channel].get("chanserv", irc.chanserv):
+            return False
+        irc.privmsg("ChanServ", "OP {}".format(channel))
+        log.info("Waiting for op in {}".format(channel))
+        denied = queue.Queue()
+        while True:
+            if irc.is_opped(irc.get_nick(), channel):
+                    return True
+            elif not denied.empty():
+                denychan = denied.get()
+                if irccmp(denychan, channel):
+                    log.info("ChanServ denied op in {}".format(channel))
+                    denied = None
+                    return False
+            time.sleep(0.2)
+    else:
+        return True
 
 class console(code.InteractiveConsole):
     def __init__(self, irc, utils, event):

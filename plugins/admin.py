@@ -2,7 +2,6 @@ from fnmatch import fnmatch
 from time import sleep
 import subprocess
 import random as rand
-import queue
 
 from utils import *
 import utils
@@ -18,8 +17,6 @@ def main(irc):
         irc.plugins[name] = {}
     if not name in irc.state["plugins"]:
         irc.state["plugins"][name] = {}
-    irc.state["plugins"][name]["opped"] = None
-    irc.state["plugins"][name]["denied"] = None
 
 @add_cmd
 def join(irc, event, args):
@@ -412,7 +409,7 @@ def op(irc, event, args):
                 return
             if not already_op and irc.get_nick() not in nicks:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -455,7 +452,7 @@ def deop(irc, event, args):
                 return
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -499,7 +496,7 @@ def voice(irc, event, args):
                 return
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -542,7 +539,7 @@ def devoice(irc, event, args):
                 return
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -592,7 +589,7 @@ def ban(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick())) # remove op from self after ban
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -656,7 +653,7 @@ def kban(irc, event, args):
             if len(setmodes) == 0:
                 return
             already_op = irc.is_opped(irc.get_nick(), channel)
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -707,7 +704,7 @@ def kick(irc, event, args):
                     break
             nicks = prepare_nicks
             already_op = irc.is_opped(irc.get_nick(), channel)
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for nick in nicks:
                     if reason:
@@ -769,7 +766,7 @@ def unban(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -819,7 +816,7 @@ def quiet(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -876,7 +873,7 @@ def unquiet(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for mode in utils.unsplit_modes(setmodes):
                     irc.mode(channel, mode)
@@ -911,7 +908,7 @@ def mode(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if not already_op:
                 setmodes.append("-o {}".format(irc.get_nick()))
-            gotop = getop(irc, channel)
+            gotop = utils.getop(irc, channel)
             if gotop:
                 for modes in utils.unsplit_modes(setmodes):
                     irc.mode(channel, modes)
@@ -924,32 +921,6 @@ def random(irc, event, args): # I'll delete this after
     """
     random_events = ["moo{}".format("o"*rand.randint(0, 100)), "lol"]
     irc.reply(event, rand.choice(random_events))
-
-def getop(irc, channel):
-    if not irc.is_opped(irc.get_nick(), channel):
-        if not irc.channels[channel].get("chanserv", irc.chanserv):
-            return False
-        irc.privmsg("ChanServ", "OP {}".format(channel))
-        log.info("Waiting for op in {}".format(channel))
-        irc.state["plugins"][name]["opped"] = queue.Queue()
-        irc.state["plugins"][name]["denied"] = queue.Queue()
-        while True:
-            if not irc.state["plugins"][name]["opped"].empty():
-                opchan = irc.state["plugins"][name]["opped"].get()
-                if utils.irccmp(opchan, channel):
-                    irc.state["plugins"][name]["opped"] = None
-                    irc.state["plugins"][name]["denied"] = None
-                    return True
-            elif not irc.state["plugins"][name]["denied"].empty():
-                denychan = irc.state["plugins"][name]["denied"].get()
-                if utils.irccmp(denychan, channel):
-                    log.info("ChanServ denied op in {}".format(channel))
-                    irc.state["plugins"][name]["opped"] = None
-                    irc.state["plugins"][name]["denied"] = None
-                    return False
-            sleep(0.2)
-    else:
-        return True
 
 def on_mode(irc, conn, event):
     channel = event.target
@@ -973,7 +944,7 @@ def on_mode(irc, conn, event):
                         setmodes.append("-v {}".format(nick))
                 setmodes.append("+b {}".format(bmask))
                 already_op = irc.is_opped(irc.get_nick(), channel)
-                gotop = getop(irc, channel)
+                gotop = utils.getop(irc, channel)
                 if gotop:
                     for modes in utils.unsplit_modes(setmodes):
                         irc.mode(channel, modes)
@@ -981,24 +952,4 @@ def on_mode(irc, conn, event):
                         irc.kick(channel, nick)
                     if not already_op:
                         irc.mode(channel, "-o {}".format(irc.get_nick()))
-    if not name in irc.state["plugins"]:
-        irc.state["plugins"][name] = {}
-    if irc.state["plugins"][name]["opped"]:
-        for mode in modes:
-            if mode == "+o {}".format(irc.get_nick()):
-                irc.state["plugins"][name]["opped"].put_nowait(channel)
 add_handler(on_mode, name)
-
-def on_privnotice(irc, conn, event):
-    if not name in irc.state["plugins"]:
-        irc.state["plugins"][name] = {}
-    nick = event.source.nick
-    msg = event.arguments[0]
-    if nick == "ChanServ" and irc.state["plugins"][name]["denied"]:
-        if "You are not authorized" in msg:
-            channel = msg.split("\x02")[3]
-            irc.state["plugins"][name]["denied"].put(channel)
-        elif "is not registered" in msg:
-            channel = msg.split("\x02")[1]
-            irc.state["plugins"][name]["denied"].put(channel)
-add_handler(on_privnotice, name)

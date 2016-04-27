@@ -127,8 +127,6 @@ class IRC(irc.client.SimpleIRCClient):
         except KeyboardInterrupt:
             self.quit(self.quitmsg)
             sys.exit(0)
-        except ValueError:
-            pass
         except irc.client.ServerConnectionError:
             self.restart()
 
