@@ -24,6 +24,7 @@ handlers = {}
 command_hooks = defaultdict(list)
 argmodes = {"set": "bqeIkfljov", "unset": "bqeIkov"}
 hmregex = re.compile("\S+!\S+@\S+")
+bfregex = re.compile("\S+!\S+@\S+\$\S+")
 gotwho = threading.Event()
 denied = None
 
@@ -118,6 +119,42 @@ def is_allowed(irc, hostmask, channel=None):
                 return True
     return False
 
+def is_ignored(irc, hostmask, channel=None):
+    hostmask = str(hostmask)
+    nick = irclib.NickMask(hostmask).nick
+    if is_owner(irc, hostmask, channel):
+        return False
+    if is_allowed(irc, hostmask, channel):
+        return False
+    for ignore in irc.ignored:
+        if ignore.startswith("$a") and getacc(irc, nick, True):
+            if ignore == "$a":
+                return True
+            else:
+                ignore = ignore.lstrip("$a:")
+                account = getacc(irc, nick, True)
+                if irccmp(account, ignore):
+                    return True
+        elif fnmatch(irclower(hostmask), irclower(ignore)):
+            return True
+    if channel:
+        try:
+            ignored = irc.channels[channel].get("owners", [])
+            for ignore in ignored:
+                if ignore.startswith("$a") and getacc(irc, nick, True):
+                    if ignore == "$a":
+                        return True
+                    else:
+                        ignore = ignore.lstrip("$a:")
+                        account = getacc(irc, nick, True)
+                        if irccmp(account, ignore):
+                            return True
+                elif fnmatch(irclower(hostmask), irclower(ignore)):
+                    return True
+        except KeyError:
+            return False
+    return False
+
 def is_hostmask(string):
     return hmregex.match(string)
 
@@ -135,7 +172,7 @@ def is_command(irc, conn, event):
             trigger = irc.channels[channel].get("trigger", irc.trigger)
         except KeyError:
             trigger = irc.trigger
-        if silence:
+        if silence or is_ignored(irc, event.source, channel):
             return False
         elif msg.startswith(trigger) and len(trigger) > 0:
             return True
@@ -299,6 +336,8 @@ def getip(irc, hmask, use_cache=False):
 
 def ban_affects(irc, channel, bmask):
     affected = []
+    if bfregex.match(bmask):
+        bmask = bmask.split("$")[0]
     try:
         for nick in irc.state["channels"][channel]["names"]:
             if fnmatch(irclower(gethm(irc, nick, True)), irclower(bmask)):
