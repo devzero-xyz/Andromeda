@@ -89,6 +89,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.state["users"] = {}
         if "plugins" not in self.state:
             self.state["plugins"] = {}
+        self.state["server"]["isupport"] = {}
         self.version = "Andromeda 2.0.0-dev"
         reload_config(self)
         reload_handlers(init=True)
