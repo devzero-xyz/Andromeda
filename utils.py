@@ -139,7 +139,7 @@ def is_ignored(irc, hostmask, channel=None):
             return True
     if channel:
         try:
-            ignored = irc.channels[channel].get("owners", [])
+            ignored = irc.channels[channel].get("ignored", [])
             for ignore in ignored:
                 if ignore.startswith("$a") and getacc(irc, nick, True):
                     if ignore == "$a":
