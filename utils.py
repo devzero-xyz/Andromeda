@@ -340,8 +340,14 @@ def ban_affects(irc, channel, bmask):
         bmask = bmask.split("$")[0]
     try:
         for nick in irc.state["channels"][channel]["names"]:
-            if fnmatch(irclower(gethm(irc, nick, True)), irclower(bmask)):
+            hmask = irclower(gethm(irc, nick, True))
+            if fnmatch(hmask, irclower(bmask)):
                 affected.append(nick)
+            elif "@gateway/web/freenode/" in hmask:
+                host = irclib.NickMask(hmask).host
+                hmask = hmask.replace(host, getip(irc, nick, True))
+                if fnmatch(hmask, irclower(bmask)):
+                    affected.append(nick)
         return affected
     except KeyError:
         return affected
