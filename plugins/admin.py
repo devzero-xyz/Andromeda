@@ -102,9 +102,9 @@ def _exec(irc, event, args):
     Executes <code> in a Python interpreter.
     """
     if is_owner(irc, event.source):
-        botenv = utils.console(irc, utils, event)
-        if not botenv.run(" ".join(args)) and botenv.out:
-            irc.reply(event, botenv.out)
+        output = utils.console({"irc": irc, "utils": utils, "event": event}).run(" ".join(args))
+        if output is not None:
+            irc.reply(event, output)
 add_cmd(_exec, ">>")
 
 def _shell(irc, event, args):
