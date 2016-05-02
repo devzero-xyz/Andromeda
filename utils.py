@@ -492,40 +492,30 @@ def getop(irc, channel):
         return True
 
 class console(code.InteractiveConsole):
-    def __init__(self, irc, utils, event):
-        code.InteractiveConsole.__init__(self, {
-            "irc": irc,
-            "utils": utils,
-            "event": event,
-            "globals": globals
-        })
-        self.out = ""
-        self.data = ""
+
+    def __init__(self, items=None):
+        if items is None:
+            items = {}
+        code.InteractiveConsole.__init__(self, items)
+        self._buffer = ""
 
     def write(self, data):
-        self.data += data
+        self._buffer += str(data)
 
-    def commit(self, code):
-        self.lastout = self.out
-        msg = self.data
-        msg = msg.rstrip("\n")
-        self.out = ' | '.join(msg.splitlines())
-        self.lastcode = code
-        self.data = ""
+    def run(self, data):
+        sys.stdout = self
+        self.push(data)
+        sys.stdout = sys.__stdout__
+        result = self._buffer
+        self._buffer = ""
+        return result
 
     def showtraceback(self):
-        err, msg, _ = sys.exc_info()
-        self.write("%s: %s"%(err.__name__, msg))
+        exc_type, value, lasttb = sys.exc_info()
+        self._buffer+="{0}: {1}".format(exc_type.__name__, value)
 
     def showsyntaxerror(self, filename):
         self.showtraceback()
-
-    def run(self, code):
-        sys.stdout = self
-        v = self.push(code)
-        sys.stdout = sys.__stdout__
-        self.commit(code)
-        return v
 
 # Modified version of Throttler in jaraco.functools
 class Throttler(object):
