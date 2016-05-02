@@ -5,7 +5,8 @@ def on_join(irc, conn, event):
     channel = event.target
     if nick == irc.get_nick():
         log.info("Joined to {}".format(channel))
-        irc.state["channels"][channel] = {}
+        if channel not in irc.state["channels"]:
+            irc.state["channels"][channel] = {}
         irc.state["channels"][channel]["topic"] = "" # TOPIC chan
         irc.state["channels"][channel]["names"] = [] # NAMES chan
         irc.state["channels"][channel]["bans"] = [] # MODE chan b

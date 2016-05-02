@@ -89,6 +89,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.state["users"] = {}
         if "plugins" not in self.state:
             self.state["plugins"] = {}
+        self.state["server"]["isupport"] = {}
         self.version = "Andromeda 2.0.0-dev"
         reload_config(self)
         reload_handlers(init=True)
@@ -116,21 +117,19 @@ class IRC(irc.client.SimpleIRCClient):
         self.connection.add_global_handler("all_events", self.on_all_events)
         self.fifo_thread = threading.Thread(target=self.fifo)
         self.fifo_thread.daemon = True
-        self.config_timer = threading.Timer(300, self.save_config)
-        self.config_timer.daemon = True
+        self.reactor.execute_every(300, self.save_config)
         self.pingfreq = 30
         self.timeout = self.pingfreq * 2
         self.lastping = time.time()
-        self.ping_timer = threading.Timer(self.pingfreq, self.ping)
-        self.ping_timer.daemon = True
+        self.reactor.execute_every(self.pingfreq, self.ping)
         self.set_rate_limit(self.throttle, self.burst)
         try:
             self.start()
         except KeyboardInterrupt:
             self.quit(self.quitmsg)
             sys.exit(0)
-        except ValueError:
-            pass
+        except irc.client.ServerConnectionError:
+            self.restart()
 
     def reload_config(self):
         self.config = config.load(self.config_file)
@@ -156,11 +155,14 @@ class IRC(irc.client.SimpleIRCClient):
         self.channels = self.config.get("channels", {})
         self.owners = self.config.get("owners", [])
         self.allowed = self.config.get("allowed", [])
+        self.ignored = self.config.get("ignored", [])
         self.trigger = self.config.get("trigger", "+")
         self.umodes = self.config.get("umodes", None)
         self.plugins = self.config.get("plugins", {})
         self.throttle = self.config.get("throttle", 1)
         self.burst = self.config.get("burst", 5)
+        self.aliases = self.config.get("aliases", {})
+        self.factoids = self.config.get("factoids", {})
 
     def save_config(self):
         self.config["server"] = self.server
@@ -207,6 +209,7 @@ class IRC(irc.client.SimpleIRCClient):
         reload_config(self)
         reload_handlers()
         reload_plugins(self)
+        self.lastping = time.time()
         if event.type != "all_raw_messages":
             try:
                 func = globals()['on_'+event.type]
@@ -300,6 +303,7 @@ class IRC(irc.client.SimpleIRCClient):
         if diff > self.timeout:
             log.warn("Lagging by {} seconds! Disconnecting.".format(int(diff)))
             self.quit("No Ping reply in {} seconds.".format(int(diff)))
+            self.restart()
         else:
             self.send("PING :{}".format(now))
 

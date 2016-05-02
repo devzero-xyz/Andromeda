@@ -8,6 +8,7 @@ import requests
 import inspect
 import codecs
 import socket
+import queue
 import code
 import time
 import sys
@@ -23,10 +24,12 @@ handlers = {}
 command_hooks = defaultdict(list)
 argmodes = {"set": "bqeIkfljov", "unset": "bqeIkov"}
 hmregex = re.compile("\S+!\S+@\S+")
+bfregex = re.compile("\S+!\S+@\S+\$\S+")
 gotwho = threading.Event()
+denied = None
 
 def paste(payload):
-    pastebin = "http://hastebin.com/"
+    pastebin = "https://paste.indigotiger.me/"
     url = pastebin+"documents"
     response = requests.post(url, data=payload)
     if response.status_code == 200:
@@ -116,6 +119,42 @@ def is_allowed(irc, hostmask, channel=None):
                 return True
     return False
 
+def is_ignored(irc, hostmask, channel=None):
+    hostmask = str(hostmask)
+    nick = irclib.NickMask(hostmask).nick
+    if is_owner(irc, hostmask, channel):
+        return False
+    if is_allowed(irc, hostmask, channel):
+        return False
+    for ignore in irc.ignored:
+        if ignore.startswith("$a") and getacc(irc, nick, True):
+            if ignore == "$a":
+                return True
+            else:
+                ignore = ignore.lstrip("$a:")
+                account = getacc(irc, nick, True)
+                if irccmp(account, ignore):
+                    return True
+        elif fnmatch(irclower(hostmask), irclower(ignore)):
+            return True
+    if channel:
+        try:
+            ignored = irc.channels[channel].get("ignored", [])
+            for ignore in ignored:
+                if ignore.startswith("$a") and getacc(irc, nick, True):
+                    if ignore == "$a":
+                        return True
+                    else:
+                        ignore = ignore.lstrip("$a:")
+                        account = getacc(irc, nick, True)
+                        if irccmp(account, ignore):
+                            return True
+                elif fnmatch(irclower(hostmask), irclower(ignore)):
+                    return True
+        except KeyError:
+            return False
+    return False
+
 def is_hostmask(string):
     return hmregex.match(string)
 
@@ -133,12 +172,13 @@ def is_command(irc, conn, event):
             trigger = irc.channels[channel].get("trigger", irc.trigger)
         except KeyError:
             trigger = irc.trigger
-        if silence:
+        if silence or is_ignored(irc, event.source, channel):
             return False
         elif msg.startswith(trigger) and len(trigger) > 0:
             return True
-        elif msg.startswith(irc.get_nick()):
-            return True
+        elif len(msg.split()) > 0:
+            if msg.split()[0].rstrip(":,") == irc.get_nick():
+                return True
     return False
 
 def handle_command(irc, conn, event):
@@ -149,8 +189,18 @@ def handle_command(irc, conn, event):
         channel = event.source.nick
     try:
         trigger = irc.channels[channel].get("trigger", irc.trigger)
+        aliases = irc.channels[channel].get("aliases", irc.aliases)
+        factoids = irc.channels[channel].get("factoids", irc.factoids)
     except KeyError:
         trigger = irc.trigger
+        aliases = irc.aliases
+        factoids = irc.factoids
+    for alias in irc.aliases:
+        if alias not in aliases:
+            aliases[alias] = irc.aliases[alias]
+    for factoid in irc.factoids:
+        if factoid not in factoids:
+            factoids[factoid] = irc.factoids[factoid]
     if msg.startswith(trigger) and len(trigger) > 0:
         msg = msg.split()
         command = msg[0].replace(trigger, "", 1).lower()
@@ -160,10 +210,14 @@ def handle_command(irc, conn, event):
             args = []
     elif msg.startswith(irc.get_nick()):
         msg = msg.split()
-        command = msg[1].lower()
-        if len(msg) > 2:
-            args = msg[2:]
+        if len(msg) > 1:
+            command = msg[1].lower()
+            if len(msg) > 2:
+                args = msg[2:]
+            else:
+                args = []
         else:
+            command = ""
             args = []
     else:
         msg = msg.split()
@@ -173,6 +227,30 @@ def handle_command(irc, conn, event):
         else:
             args = []
     try:
+        if command in aliases:
+            alias = aliases[command].split()
+            command = alias[0].lower()
+            if len(alias) > 1:
+                origargs = args
+                args = alias[1:]
+                if args:
+                    try:
+                        args = [arg
+                        .replace("%n", event.source.nick)
+                        .replace("%cc", event.target)
+                        .replace("%h", irc.state["users"][event.source.nick]["host"])
+                        .replace("%a", irc.state["users"][event.source.nick]["account"])
+                        .replace("%u", irc.state["users"][event.source.nick]["user"])
+                        .replace("%g", irc.state["users"][event.source.nick]["gecos"])
+                        .replace("%cs", " ".join(irc.state["users"][event.source.nick]["channels"]))
+                        for arg  in args]
+                    except:
+                        pass # User can't be found
+                for arg in origargs:
+                    args.append(arg)
+        elif command in factoids:
+            irc.reply(event, factoids[command])
+            return
         func = commands[command]
 
     except KeyError:
@@ -258,10 +336,18 @@ def getip(irc, hmask, use_cache=False):
 
 def ban_affects(irc, channel, bmask):
     affected = []
+    if bfregex.match(bmask):
+        bmask = bmask.split("$")[0]
     try:
         for nick in irc.state["channels"][channel]["names"]:
-            if fnmatch(irclower(gethm(irc, nick, True)), irclower(bmask)):
+            hmask = irclower(gethm(irc, nick, True))
+            if fnmatch(hmask, irclower(bmask)):
                 affected.append(nick)
+            elif "@gateway/web/freenode/" in hmask:
+                host = irclib.NickMask(hmask).host
+                hmask = hmask.replace(host, getip(irc, nick, True))
+                if fnmatch(hmask, irclower(bmask)):
+                    affected.append(nick)
         return affected
     except KeyError:
         return affected
@@ -304,7 +390,7 @@ def banmask(irc, hostmask):
         bm = "*!*@{}".format(host)
         return bm
     else:
-        bm = "*!{}@{}".join(user, host)
+        bm = "*!{}@{}".format(user, host)
         return bm
 
 def split_modes(modes):
@@ -384,6 +470,26 @@ def gethelp(cmd):
             return "No help found for: {}".format(cmd)
     except (NameError, KeyError):
         return "ERROR: No such command: {}".format(cmd)
+
+def getop(irc, channel):
+    if not irc.is_opped(irc.get_nick(), channel):
+        if not irc.channels[channel].get("chanserv", irc.chanserv):
+            return False
+        irc.privmsg("ChanServ", "OP {}".format(channel))
+        log.info("Waiting for op in {}".format(channel))
+        denied = queue.Queue()
+        while True:
+            if irc.is_opped(irc.get_nick(), channel):
+                    return True
+            elif not denied.empty():
+                denychan = denied.get()
+                if irccmp(denychan, channel):
+                    log.info("ChanServ denied op in {}".format(channel))
+                    denied = None
+                    return False
+            time.sleep(0.2)
+    else:
+        return True
 
 class console(code.InteractiveConsole):
     def __init__(self, irc, utils, event):

@@ -12,6 +12,16 @@ def on_privnotice(irc, conn, event):
                             irc.join(channel, irc.channels[channel]["key"])
                         else:
                             irc.join(channel)
+    elif event.source.nick == "ChanServ" and utils.denied:
+        channel = None
+        if "not authorized" in event.arguments[0]:
+            channel = event.arguments[0].split("\x02")[3]
+        elif "is not registered" in event.arguments[0]:
+            channel = event.arguments[0].split("\x02")[1]
+        elif "is not on" in event.arguments[0]:
+            channel = event.arguments[0].split("\x02")[3]
+        if channel:
+            utils.denied.put_nowait(channel)
     elif utils.is_command(irc, conn, event):
         utils.handle_command(irc, conn, event)
 
