@@ -91,6 +91,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.state["plugins"] = {}
         self.state["server"]["isupport"] = {}
         self.version = "Andromeda 2.0.0-dev"
+        self.starttime = time.time()
         reload_config(self)
         reload_handlers(init=True)
         reload_plugins(self, init=True)
