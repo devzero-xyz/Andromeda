@@ -197,7 +197,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["throttle"] = self.throttle
         self.config["burst"] = self.burst
         config.save(self.config_file, self.config)
-        self.state.save()
+        self.state.sync()
         log.info("Config saved to file.")
 
     def set_rate_limit(self, frequency, skip_for=0):
@@ -361,6 +361,7 @@ class IRC(irc.client.SimpleIRCClient):
         else:
             self.connection.quit()
         self.save_config()
+        self.state.close()
 
     def restart(self):
         if self.connected:
