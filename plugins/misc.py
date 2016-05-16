@@ -1,4 +1,5 @@
 from utils import *
+import random
 
 name = "misc"
 cmds = ["list", "ping", "moo", "echo", "action", "help", "version",
@@ -34,7 +35,11 @@ def moo(irc,event, args):
 
     Replies with 'pmooooooooooooooooooooooooooooong!'
     """
-    irc.reply(event, "pmooooooooooooooooooooooooooooong!")
+    
+    returned = "\x02"
+    for i in list("pmooooooooooooooooooooooooooooong!"):
+        returned = returned + "\x03{}".format(random.randint(0,15)) + i
+    irc.reply(event, returned)
 
 @add_cmd
 def echo(irc, event, args):
