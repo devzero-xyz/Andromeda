@@ -8,7 +8,7 @@ import requests
 import bs4
 
 plugin_sources = {
-    "https://github.com/devzero-xyz/Andromeda/tree/master/plugins": {}, # wil contain plugin names and raw url
+    "https://github.com/devzero-xyz/Andromeda/tree/master/plugins": {},
     "https://github.com/devzero-xyz/Andromeda-Plugins": {},
     "https://github.com/IndigoTiger/Andromeda-plugins": {},
 }
@@ -50,7 +50,7 @@ def updates(irc, event, args):
                 for active_plugin in os.listdir("plugins"):
                     if active_plugin == plugin_name:
                         with open("plugins/" + active_plugin, "r") as deltax:
-                            if deltax.read() != requests.get(plugin_sources[plugin_source_url][plugin_name]).text:
+                            if deltax.read() != requests.get(irc.plugins[name]["urls"][plugin_source_url][plugin_name]).text:
                                 updates.append(active_plugin.replace(".py", ""))
                             deltax.close()
         if updates:
