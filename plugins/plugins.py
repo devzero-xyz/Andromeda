@@ -74,7 +74,7 @@ def available(irc, event, args):
         if available_plugins:
             irc.reply(event, "The follwing plugin(s) can be installed: {}".format(" | ".join(available_plugins)))
         else:
-            irc.reply(event, "You have all the plugins installed given the {} urls in this plugin: plugins.py".format(len(plugin_sources)))
+            irc.reply(event, "You have all the plugins installed given the {} urls in this plugin: plugins.py".format(len(irc.plugins[name]["urls"])))
 
 @add_cmd
 def update(irc, event, args):
