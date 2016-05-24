@@ -11,6 +11,7 @@ plugin_sources = {
     "https://github.com/devzero-xyz/Andromeda/tree/master/plugins": {},
     "https://github.com/devzero-xyz/Andromeda-Plugins": {},
     "https://github.com/IndigoTiger/Andromeda-plugins": {},
+    "https://github.com/itslukej/Andromeda-plugins": {}
 }
 
 name = "plugins"
