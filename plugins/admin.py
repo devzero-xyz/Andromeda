@@ -445,6 +445,8 @@ def deop(irc, event, args):
             already_op = irc.is_opped(irc.get_nick(), channel)
             if "*" in nicks:
                 nicks = irc.state["channels"][channel]["names"]
+                if irc.get_nick() in nicks:
+                    nicks.remove(irc.get_nick())
             for nick in nicks:
                 if irc.is_opped(nick, channel):
                     setmodes.append("-o {}".format(nick))
