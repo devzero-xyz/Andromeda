@@ -191,6 +191,7 @@ class IRC(irc.client.SimpleIRCClient):
         self.config["channels"] = self.channels
         self.config["owners"] = self.owners
         self.config["allowed"] = self.allowed
+        self.config["ignored"] = self.ignored
         self.config["trigger"] = self.trigger
         self.config["umodes"] = self.umodes
         self.config["plugins"] = self.plugins
