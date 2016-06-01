@@ -447,9 +447,8 @@ def deop(irc, event, args):
                 nicks = irc.state["channels"][channel]["names"]
                 if irc.get_nick() in nicks:
                     nicks.remove(irc.get_nick())
-                if "chanserv" in irc.channels[channel] and "ChanServ" in nicks:
-                    if irc.channels[channel]["chanserv"]:
-                        nicks.remove("ChanServ")
+            if irc.channels[channel].get("chanserv", irc.chanserv) and "ChanServ" in nicks:
+                nicks.remove("ChanServ")
             for nick in nicks:
                 if irc.is_opped(nick, channel):
                     setmodes.append("-o {}".format(nick))
