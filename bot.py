@@ -319,8 +319,12 @@ class IRC(irc.client.SimpleIRCClient):
         self.connection.mode(channel, modes)
 
     def notice(self, target, msg):
-        msg = str(msg)
-        msgs = [msg[i:i+480] for i in range(0, len(msg), 480)]
+        msg = str(msg).encode()
+        maxlen = 512 - len("NOTICE {}\r\n".format(target).encode())
+        msgs1 = [msg[i:i+mexlen] for i in range(0, len(msg), maxlen)]
+        msgs = []
+        for msg in msgs1:
+            msgs.append(msg.decode())
         if len(msgs) > 3:
             self.connection.notice(target, utils.paste("".join(msgs)))
         else:
@@ -329,8 +333,12 @@ class IRC(irc.client.SimpleIRCClient):
                 self.connection.notice(target, msg)
 
     def privmsg(self, target, msg):
-        msg = str(msg)
-        msgs = [msg[i:i+480] for i in range(0, len(msg), 480)]
+        msg = str(msg).encode()
+        maxlen = 512 - len("PRIVMSG {}\r\n".format(target).encode())
+        msgs1 = [msg[i:i+maxlen] for i in range(0, len(msg), maxlen)]
+        msgs = []
+        for msg in msgs1:
+            msgs.append(msg.decode())
         if len(msgs) > 3:
             self.connection.privmsg(target, utils.paste("".join(msgs)))
         else:
