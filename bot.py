@@ -320,7 +320,7 @@ class IRC(irc.client.SimpleIRCClient):
 
     def notice(self, target, msg):
         msg = str(msg).encode()
-        maxlen = 512 - len("NOTICE {}\r\n".format(target).encode())
+        maxlen = 512 - len("NOTICE {} :\r\n".format(target).encode())
         msgs1 = [msg[i:i+mexlen] for i in range(0, len(msg), maxlen)]
         msgs = []
         for msg in msgs1:
@@ -334,7 +334,7 @@ class IRC(irc.client.SimpleIRCClient):
 
     def privmsg(self, target, msg):
         msg = str(msg).encode()
-        maxlen = 512 - len("PRIVMSG {}\r\n".format(target).encode())
+        maxlen = 512 - len("PRIVMSG {} :\r\n".format(target).encode())
         msgs1 = [msg[i:i+maxlen] for i in range(0, len(msg), maxlen)]
         msgs = []
         for msg in msgs1:
