@@ -55,7 +55,7 @@ def updates(irc, event, args):
                                 updates.append(active_plugin.replace(".py", ""))
                             deltax.close()
         if updates:
-            irc.reply(event, "The follwing plugin(s) can be updated: {}".format(" ".join(updates)))
+            irc.reply(event, "The following plugin(s) can be updated: {}".format(" ".join(updates)))
         else:
             irc.reply(event, "No plugins can be updated")
 
@@ -73,7 +73,7 @@ def available(irc, event, args):
                 if plugin not in os.listdir("plugins"):
                     available_plugins.append(plugin.replace("plugins/","").replace(".py", ""))
         if available_plugins:
-            irc.reply(event, "The follwing plugin(s) can be installed: {}".format(" | ".join(available_plugins)))
+            irc.reply(event, "The following plugin(s) can be installed: {}".format(" | ".join(available_plugins)))
         else:
             irc.reply(event, "You have all the plugins installed given the {} urls in this plugin: plugins.py".format(len(irc.plugins[name]["urls"])))
 
