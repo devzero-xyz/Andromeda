@@ -369,6 +369,7 @@ class IRC(irc.client.SimpleIRCClient):
             self.quit("Restarting.")
         else:
             self.save_config()
+            self.state.close()
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def who(self, target):
