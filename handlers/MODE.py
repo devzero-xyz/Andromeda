@@ -44,7 +44,7 @@ def on_mode(irc, conn, event):
                 irc.channels[channel]["key"] = key
                 
             elif mode.startswith("-k"):
-                irc.channels[channel][key] = ""
+                irc.channels[channel]["key"] = ""
 
             elif mode.startswith("+o"):
                 nick = mode.split()[1]
