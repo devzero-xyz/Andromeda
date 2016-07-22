@@ -21,9 +21,8 @@ def on_join(irc, conn, event):
         log.info("Syncing {} users".format(channel))
         irc.who(channel)
         log.info("Syncing {} bans".format(channel))
-        irc.mode(channel, "b")
         log.info("Syncing {} quiets".format(channel))
-        irc.mode(channel, "q")
+        irc.mode(channel, "bq")
     if nick not in irc.state["channels"][channel]["names"]:
         irc.state["channels"][channel]["names"].append(nick)
     if nick not in irc.state["users"]:
