@@ -15,7 +15,6 @@ def on_join(irc, conn, event):
         irc.state["channels"][channel]["invites"] = [] # MODE chan i
         irc.state["channels"][channel]["ops"] = []
         irc.state["channels"][channel]["voices"] = []
-        irc.state["channels"][channel]["antispam"] = {}
         if channel not in irc.channels:
             irc.channels[channel] = {}
             irc.save_config()
