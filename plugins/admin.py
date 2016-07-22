@@ -23,6 +23,8 @@ def join(irc, event, args):
     """<channel> [<key>,<channel>...]
 
     Makes the bot join <channel> using <key> if given.
+    If no key is given but the bot already has a record
+    of the channel's key, it will attempt to use that.
     """
     args = " ".join(args)
     for channel in args.split(","):
@@ -32,7 +34,11 @@ def join(irc, event, args):
                 if len(channel) > 1:
                     irc.join(channel[0], channel[1])
                 else:
-                    irc.join(channel[0])
+                    if "key" in irc.channels[channel[0]].keys():
+                        key = irc.channels[channels[0]]["key"]
+                        irc.join(channel[0], key)
+                    else:
+                        irc.join(channel[0])
             else:
                 irc.reply(event, "ERROR: Invalid channel: {}".format(channel[0]))
 
