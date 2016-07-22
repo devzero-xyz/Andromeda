@@ -38,6 +38,10 @@ def on_mode(irc, conn, event):
                 mask = mode.split()[1]
                 if mask in irc.state["channels"][channel]["invites"]:
                     irc.state["channels"][channel]["invites"].remove(mask)
+                    
+            elif mode.startswith("+k"):
+                key = mode.split()[1]
+                irc.channels[channel]["key"] = key
 
             elif mode.startswith("+o"):
                 nick = mode.split()[1]
