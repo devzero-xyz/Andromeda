@@ -119,8 +119,6 @@ def on_channelmodeis(irc, conn, event):
     modes = utils.split_modes(message[1:])
     extra = message[2:]
     channel = message[0]
-    irc.privmsg("##devzero-andromeda", "MODES " + str(modes))
-    irc.privmsg("##devzero-andromeda", "SPLIT MESSAGE " + str(message))
 
     irc.channels[channel]["modes"] = []
     
