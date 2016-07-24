@@ -43,6 +43,11 @@ def on_mode(irc, conn, event):
                 key = mode.split()[1]
                 irc.channels[channel]["key"] = key
                 
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+k"):
+                            irc.channels[channel]["modes"][iteration] = "+k " + key
+                
             elif mode.startswith("-k"):
                 irc.channels[channel]["key"] = ""
 
