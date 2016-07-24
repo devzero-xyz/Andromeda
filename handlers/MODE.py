@@ -76,3 +76,20 @@ def on_mode(irc, conn, event):
                 nick = mode.split()[1]
                 if nick in irc.state["channels"][channel]["voices"]:
                     irc.state["channels"][channel]["voices"].remove(nick)
+                    
+def on_channelmodeis(irc, conn, event):
+    message = event.arguments
+    message[0].replace("+", "")
+    modes = utils.split_modes(message[1:])
+    extra = message[2:]
+    channel = message[0]
+    irc.privmsg("##devzero-andromeda", "MODES " + str(modes))
+    irc.privmsg("##devzero-andromeda", "SPLIT MESSAGE " + str(message))
+
+    irc.channels[channel]["modes"] = []
+    
+    for mode in modes:
+        irc.channels[channel]["modes"].append(mode)
+
+        if mode.startswith("+k"):
+            irc.channels[channel][key] = mode.split()[1]
