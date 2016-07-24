@@ -61,7 +61,7 @@ def on_mode(irc, conn, event):
                 if "modes" in irc.channels[channel].keys():
                     for iteration, mode in irc.channels[channel]["modes"]:
                         if mode.startswith("+j"):
-                            irc.channels[channel]["modes"].pop(iteration])
+                            irc.channels[channel]["modes"].pop(iteration)
                             
             elif mode.startswith("+f"):
                 if "modes" in irc.channels[channel].keys():
