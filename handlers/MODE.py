@@ -126,4 +126,4 @@ def on_channelmodeis(irc, conn, event):
         irc.channels[channel]["modes"].append(mode)
 
         if mode.startswith("+k"):
-            irc.channels[channel][key] = mode.split()[1]
+            irc.channels[channel]["key"] = mode.split()[1]
