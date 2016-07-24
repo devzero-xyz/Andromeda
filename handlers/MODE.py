@@ -50,6 +50,42 @@ def on_mode(irc, conn, event):
                 
             elif mode.startswith("-k"):
                 irc.channels[channel]["key"] = ""
+                
+            elif mode.startswith("+j"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+j"):
+                            irc.channels[channel]["modes"][iteration] = "+j " + mode.split()[1]
+                            
+            elif mode.startswith("-j"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+j"):
+                            irc.channels[channel]["modes"].pop(iteration])
+                            
+            elif mode.startswith("+f"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+f"):
+                            irc.channels[channel]["modes"][iteration] = "+f " + mode.split()[1]
+
+            elif mode.startswith("-f"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+f"):
+                            irc.channels[channel]["modes"].pop(iteration])
+
+            elif mode.startswith("+l"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+l"):
+                            irc.channels[channel]["modes"][iteration] = "+l " + mode.split()[1]
+
+            elif mode.startswith("-l"):
+                if "modes" in irc.channels[channel].keys():
+                    for iteration, mode in irc.channels[channel]["modes"]:
+                        if mode.startswith("+l"):
+                            irc.channels[channel]["modes"].pop(iteration])
 
             elif mode.startswith("+o"):
                 nick = mode.split()[1]
