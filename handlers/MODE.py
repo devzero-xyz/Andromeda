@@ -45,8 +45,8 @@ def on_mode(irc, conn, event):
                 
                 found = False
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+k"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+k"):
                             irc.channels[channel]["modes"][iteration] = "+k " + key
                             found = True
                 if not found:
@@ -56,15 +56,15 @@ def on_mode(irc, conn, event):
                 irc.channels[channel]["key"] = ""
                 
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+k"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+k"):
                             irc.channels[channel]["modes"].pop(iteration)
                 
             elif mode.startswith("+j"):
                 found = False
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+j"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+j"):
                             irc.channels[channel]["modes"][iteration] = "+j " + mode.split()[1]
                             found = True
                 if not found:
@@ -72,15 +72,15 @@ def on_mode(irc, conn, event):
             
             elif mode.startswith("-j"):
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+j"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+j"):
                             irc.channels[channel]["modes"].pop(iteration)
                             
             elif mode.startswith("+f"):
                 found = False
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+f"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+f"):
                             irc.channels[channel]["modes"][iteration] = "+f " + mode.split()[1]
                             found = True
                 if not found:
@@ -88,15 +88,15 @@ def on_mode(irc, conn, event):
                     
             elif mode.startswith("-f"):
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+f"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+f"):
                             irc.channels[channel]["modes"].pop(iteration)
 
             elif mode.startswith("+l"):
                 found = False
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+l"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+l"):
                             irc.channels[channel]["modes"][iteration] = "+l " + mode.split()[1]
                             found = True
                 if not found:
@@ -104,8 +104,8 @@ def on_mode(irc, conn, event):
 
             elif mode.startswith("-l"):
                 if "modes" in irc.channels[channel].keys():
-                    for iteration, mode in enumerate(irc.channels[channel]["modes"]):
-                        if mode.startswith("+l"):
+                    for iteration, mode2 in enumerate(irc.channels[channel]["modes"]):
+                        if mode2.startswith("+l"):
                             irc.channels[channel]["modes"].pop(iteration)
 
             elif mode.startswith("+o"):
