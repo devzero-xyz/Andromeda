@@ -15,7 +15,7 @@ def on_ctcp(irc, conn, event):
 
     elif ctcptype == "PING":
         now = int(time.time())
-        if len(args.split()) > 1:
+        if args is list and len(args.split()) > 1:
             irc.ctcp_reply(nick, "PING {} {}".format(now, args.split()[1]))
         else:
             irc.ctcp_reply(nick, "PING {}".format(now))
