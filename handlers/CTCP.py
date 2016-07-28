@@ -6,7 +6,7 @@ def on_ctcp(irc, conn, event):
     if len(event.arguments) > 1:
         args = event.arguments[1]
     else:
-        args = None
+        args = ""
     if ctcptype != "ACTION":
         log.info("Received CTCP {} from {}".format(ctcptype, event.source))
 
@@ -15,7 +15,7 @@ def on_ctcp(irc, conn, event):
 
     elif ctcptype == "PING":
         now = int(time.time())
-        if args is list and len(args.split()) > 1:
+        if len(args.split()) > 1:
             irc.ctcp_reply(nick, "PING {} {}".format(now, args.split()[1]))
         else:
             irc.ctcp_reply(nick, "PING {}".format(now))
