@@ -34,7 +34,7 @@ def join(irc, event, args):
                 if len(channel) > 1:
                     irc.join(channel[0], channel[1])
                 else:
-                    if "key" in irc.channels[channel[0]].keys() and irc.channels[channel[0]]["key"]:
+                    if channel[0] in irc.channels.keys() and "key" in irc.channels[channel[0]].keys() and irc.channels[channel[0]]["key"]:
                         key = irc.channels[channel[0]]["key"]
                         irc.join(channel[0], key)
                     else:
