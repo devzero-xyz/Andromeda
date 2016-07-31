@@ -10,7 +10,7 @@ def save(config_file, config):
         json.dump(config, conf, indent=4)
         conf.write("\n")
 def reload_config(bot):
-    bot.config = config.load(bot.config_file)
+    bot.config = load(bot.config_file)
     bot.server = bot.config["server"]
     bot.nick = bot.config["nick"]
     bot.port = bot.config.get("port", 6667)
