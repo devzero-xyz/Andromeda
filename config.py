@@ -9,6 +9,7 @@ def save(config_file, config):
     with open(config_file, "w") as conf:
         json.dump(config, conf, indent=4)
         conf.write("\n")
+#moved from bot.py
 def reload_config(bot):
     bot.config = load(bot.config_file)
     bot.server = bot.config["server"]
