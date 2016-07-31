@@ -133,71 +133,10 @@ class IRC(irc.client.SimpleIRCClient):
             self.restart()
 
     def reload_config(self):
-        self.config = config.load(self.config_file)
-        self.server = self.config["server"]
-        self.nick = self.config["nick"]
-        self.port = self.config.get("port", 6667)
-        self.ident = self.config.get("ident", self.nick)
-        self.gecos = self.config.get("realname", self.version)
-        self.quitmsg = self.config.get("quitmsg", "Ctrl-C at console.")
-        self.bindaddr = self.config.get("bindaddr", None)
-        self.ipv6 = self.config.get("ipv6", False)
-        self.ssl = self.config.get("ssl", False)
-        self.sasl = self.config.get("sasl", False)
-        self.nickserv = self.config.get("nickserv", False)
-        self.username = self.config.get("username", None)
-        self.password = self.config.get("password", None)
-        self.server_password = self.config.get("server_password", None)
-        self.autojoin = self.config.get("autojoin", True)
-        self.autorejoin = self.config.get("autorejoin", False)
-        self.chanserv = self.config.get("chanserv", False)
-        self.report = self.config.get("report", None)
-        self.silence = self.config.get("silence", False)
-        self.channels = self.config.get("channels", {})
-        self.owners = self.config.get("owners", [])
-        self.allowed = self.config.get("allowed", [])
-        self.ignored = self.config.get("ignored", [])
-        self.trigger = self.config.get("trigger", "+")
-        self.umodes = self.config.get("umodes", None)
-        self.plugins = self.config.get("plugins", {})
-        self.throttle = self.config.get("throttle", 1)
-        self.burst = self.config.get("burst", 5)
-        self.aliases = self.config.get("aliases", {})
-        self.factoids = self.config.get("factoids", {})
+        config.reload_config(self)
 
     def save_config(self):
-        self.config["server"] = self.server
-        self.config["nick"] = self.nick
-        self.config["port"] = self.port
-        self.config["ident"] = self.ident
-        self.config["realname"] = self.gecos
-        self.config["quitmsg"] = self.quitmsg
-        if type(self.bindaddr) is tuple:
-            self.config["bindaddr"] = self.bindaddr[0]
-        else:
-            self.config["bindaddr"] = self.bindaddr
-        self.config["ipv6"] = self.ipv6
-        self.config["ssl"] = self.ssl
-        self.config["sasl"] = self.sasl
-        self.config["nickserv"] = self.nickserv
-        self.config["username"] = self.username
-        self.config["password"] = self.password
-        self.config["server_password"] = self.server_password
-        self.config["autojoin"] = self.autojoin
-        self.config["autorejoin"] = self.autorejoin
-        self.config["chanserv"] = self.chanserv
-        self.config["report"] = self.report
-        self.config["silence"] = self.silence
-        self.config["channels"] = self.channels
-        self.config["owners"] = self.owners
-        self.config["allowed"] = self.allowed
-        self.config["ignored"] = self.ignored
-        self.config["trigger"] = self.trigger
-        self.config["umodes"] = self.umodes
-        self.config["plugins"] = self.plugins
-        self.config["throttle"] = self.throttle
-        self.config["burst"] = self.burst
-        config.save(self.config_file, self.config)
+        config.save_config(self)
         self.state.sync()
         log.info("Config saved to file.")
 
