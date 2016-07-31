@@ -1,1 +1,13 @@
+plugins/*.noload
+wip-plugins/
+__pycache__
+ircize
+fifo
+log
+src
+.c9
+.~*
+*.db
 *.pyc
+*.json
+!test/*

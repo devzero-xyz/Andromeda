@@ -1,0 +1,24 @@
+{
+    "server": "chat.freenode.net",
+    "port": 6697,
+    "ssl": true,
+    "nick": "Andromeda-CI",
+    "ident": "Andromeda",
+    "realname": "Andromeda",
+    "channels": {
+        "##devzero": {}
+    },
+    "ipv6": false,
+    "server_password": null,
+    "autojoin": true,
+    "autorejoin": false,
+    "chanserv": false,
+    "allowed": [],
+    "trigger": "+",
+    "nickserv": false,
+    "umodes": null,
+    "plugins": {
+        "admin": {}
+    },
+    "bindaddr": null
+}

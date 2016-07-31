@@ -1,0 +1,3 @@
+Make utils.banmask try to resolve hostnames to IP and use /64 range for IPv6 bans
+Make utils.ban_affects check IP bans too
+Extban support

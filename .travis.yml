@@ -1,0 +1,8 @@
+language: python
+cache: pip
+python:
+  - "3.4"
+install:
+  - pip install -r requirements.txt
+  - cp test/travis.py plugins/
+script: python bot.py test/travis.json

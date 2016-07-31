@@ -1,0 +1,33 @@
+{
+    "server": "chat.freenode.net",
+    "port": 6697,
+    "ssl": true,
+    "sasl": true,
+    "nick": "Andromeda",
+    "ident": "Andromeda",
+    "realname": "Andromeda 2.0.0-git",
+    "username": "Andromeda",
+    "password": "notarealpw",
+    "owners": [
+        "*!*@botters/IndigoTiger",
+        "*!*@botters/BWBellairs"
+    ],
+    "channels": {
+        "##devzero": {
+            "autorejoin": true
+        }
+    },
+    "ipv6": false,
+    "server_password": null,
+    "autojoin": true,
+    "autorejoin": false,
+    "chanserv": false,
+    "allowed": [],
+    "trigger": "+",
+    "nickserv": false,
+    "umodes": null,
+    "plugins": {
+        "admin": {}
+    },
+    "bindaddr": null
+}
