@@ -33,10 +33,13 @@ def on_pubnotice(irc, conn, event):
     nick = event.source.nick
     channel = event.target
     msg = event.arguments[0]
-    irc.state["users"][nick]["lastmsg"]["time"] = time.time()
-    irc.state["users"][nick]["lastmsg"]["channel"] = channel
-    irc.state["users"][nick]["lastmsg"]["message"] = msg
-    irc.state["users"][nick]["lastmsg"]["command"] = event.type
+    try:
+        irc.state["users"][nick]["lastmsg"]["time"] = time.time()
+        irc.state["users"][nick]["lastmsg"]["channel"] = channel
+        irc.state["users"][nick]["lastmsg"]["message"] = msg
+        irc.state["users"][nick]["lastmsg"]["command"] = event.type
+    except KeyError:
+        pass
     if utils.is_command(irc, conn, event):
         utils.handle_command(irc, conn, event)
 
@@ -44,9 +47,12 @@ def on_pubmsg(irc, conn, event):
     nick = event.source.nick
     channel = event.target
     msg = event.arguments[0]
-    irc.state["users"][nick]["lastmsg"]["time"] = time.time()
-    irc.state["users"][nick]["lastmsg"]["channel"] = channel
-    irc.state["users"][nick]["lastmsg"]["message"] = msg
-    irc.state["users"][nick]["lastmsg"]["command"] = event.type
+    try:
+        irc.state["users"][nick]["lastmsg"]["time"] = time.time()
+        irc.state["users"][nick]["lastmsg"]["channel"] = channel
+        irc.state["users"][nick]["lastmsg"]["message"] = msg
+        irc.state["users"][nick]["lastmsg"]["command"] = event.type
+    except KeyError:
+        pass
     if utils.is_command(irc, conn, event):
         utils.handle_command(irc, conn, event)
